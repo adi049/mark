@@ -70,6 +70,9 @@ function markipieSeo() {
 }
 
 export default defineConfig({
+  // GitHub Pages serves this repository under /mark/.
+  // Override this with a custom-domain build when the final domain is configured.
+  base: process.env.VITE_BASE_PATH || '/mark/',
   plugins: [react(), markipieSeo()],
   resolve: {
     alias: {
