@@ -19,8 +19,16 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// GitHub Pages is a static frontend, so the Supabase publishable key is
+// intentionally safe to ship to the browser. Environment variables override
+// these production fallbacks when configured in a local or CI build.
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL ||
+  'https://ftnmeccyphwsyleqgmkd.supabase.co'
+
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  'sb_publishable_8rBzvz2lrQN6RQAL4vxpTg_MPnHagZu'
 
 /** True when both required environment variables are present. */
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
