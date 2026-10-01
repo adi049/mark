@@ -1,0 +1,39 @@
+/* ==========================================================================
+   MARKIPIE · Utilities
+   Small, single-purpose helpers used across the app.
+   ========================================================================== */
+
+/* Visually hidden, still available to screen readers. */
+.mp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Keyboard users can jump straight to the page content. */
+.mp-skip-link {
+  position: fixed;
+  top: var(--mp-space-3);
+  left: var(--mp-space-3);
+  z-index: 100;
+  transform: translateY(-180%);
+  background: var(--mp-color-ink);
+  color: #ffffff;
+  padding: 0.65rem 1rem;
+  border-radius: var(--mp-radius-sm);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-medium);
+  transition: transform var(--mp-transition-fast);
+}
+
+.mp-skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid #ffffff;
+}

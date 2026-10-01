@@ -1,0 +1,68 @@
+/* ==========================================================================
+   MARKIPIE · Button
+   Compact, elegant actions. Not oversized, not pill shaped.
+   ========================================================================== */
+
+.mp-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--mp-space-2);
+  padding: 0.7rem 1.15rem;
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-medium);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  border-radius: var(--mp-radius-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--mp-transition-fast),
+    border-color var(--mp-transition-fast),
+    color var(--mp-transition-fast);
+}
+
+/* Solid charcoal, the primary action. */
+.mp-button--primary {
+  background-color: var(--mp-color-ink);
+  color: #ffffff;
+}
+
+.mp-button--primary:hover {
+  background-color: var(--mp-color-ink-strong);
+}
+
+/* Quiet outline, the secondary action. */
+.mp-button--secondary {
+  background-color: transparent;
+  color: var(--mp-color-ink);
+  border-color: var(--mp-color-line-strong);
+}
+
+.mp-button--secondary:hover {
+  border-color: var(--mp-color-ink-soft);
+  background-color: var(--mp-color-surface);
+}
+
+/* Text level action for low emphasis contexts. */
+.mp-button--ghost {
+  background-color: transparent;
+  color: var(--mp-color-blue-700);
+}
+
+.mp-button--ghost:hover {
+  background-color: var(--mp-color-blue-50);
+}
+
+.mp-button--sm {
+  padding: 0.5rem 0.8rem;
+  font-size: var(--mp-font-size-xs);
+}
+
+.mp-button--lg {
+  padding: 0.85rem 1.5rem;
+  font-size: var(--mp-font-size-body);
+}

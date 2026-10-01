@@ -1,0 +1,431 @@
+/* ==========================================================================
+   MARKIPIE · Home sections
+   Brand introduction with the editorial facts list, featured work mosaic,
+   why cards and the closing calls to action.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- Brand intro */
+.mp-brand-intro {
+  display: grid;
+  gap: clamp(2.5rem, 5vw, 5rem);
+  align-items: start;
+}
+
+/* Editorial facts list: values with hairlines, never stat boxes. */
+.mp-facts {
+  display: grid;
+}
+
+.mp-facts__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+  padding: 0.9rem 0.15rem;
+  border-top: 1px solid var(--mp-color-line-strong);
+}
+
+.mp-facts__row:last-child {
+  border-bottom: 1px solid var(--mp-color-line-strong);
+}
+
+.mp-facts__value {
+  font-family: var(--mp-font-display);
+  font-size: clamp(1.5rem, 1.25rem + 1.2vw, 2.1rem);
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-ink);
+  line-height: 1.1;
+}
+
+.mp-facts__label {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+  text-align: right;
+}
+
+.mp-inhouse {
+  margin-top: var(--mp-space-5);
+  padding: var(--mp-space-4) var(--mp-space-5);
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-line);
+  border-radius: var(--mp-radius-md);
+}
+
+.mp-inhouse__label {
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--mp-tracking-wide);
+  color: var(--mp-color-ink-muted);
+  margin-bottom: var(--mp-space-2);
+}
+
+.mp-inhouse__list {
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.mp-inhouse__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-inhouse__list li::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-color-green-300);
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------- Featured work */
+.mp-featured {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--mp-space-3);
+}
+
+.mp-featured__wrap {
+  display: flex;
+  min-width: 0;
+}
+
+.mp-featured__tile {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: var(--mp-radius-md);
+  overflow: hidden;
+  background: var(--mp-color-surface-alt);
+  border: 1px solid var(--mp-color-line);
+}
+
+.mp-featured__tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  transition: transform var(--mp-transition-slow);
+}
+
+.mp-featured__tile:hover img {
+  transform: scale(1.045);
+}
+
+/* Scrim keeps the label legible over any image. */
+.mp-featured__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(26, 31, 34, 0.42), transparent 45%);
+  opacity: 0.9;
+}
+
+.mp-featured__label {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--mp-radius-sm);
+  background: color-mix(in srgb, #ffffff 88%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-ink);
+}
+
+.mp-featured__tile:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+@media (min-width: 64em) {
+  .mp-featured {
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--mp-space-4);
+  }
+
+  .mp-featured__wrap--lead {
+    grid-column: span 8;
+  }
+
+  .mp-featured__wrap--tall {
+    grid-column: span 4;
+  }
+
+  .mp-featured__wrap:not(.mp-featured__wrap--lead):not(.mp-featured__wrap--tall):not(.mp-featured__wrap--wide) {
+    grid-column: span 3;
+  }
+
+  .mp-featured__wrap--wide {
+    grid-column: span 12;
+  }
+
+  .mp-featured__tile--lead img {
+    aspect-ratio: 4 / 3;
+  }
+
+  .mp-featured__tile--tall img {
+    aspect-ratio: 4 / 5;
+  }
+
+  .mp-featured__tile:not(.mp-featured__tile--lead):not(.mp-featured__tile--tall):not(.mp-featured__tile--wide) img {
+    aspect-ratio: 4 / 5;
+  }
+
+  .mp-featured__tile--wide img {
+    aspect-ratio: 21 / 9;
+  }
+}
+
+/* ------------------------------------------------------------------ Why cards */
+.mp-why__grid {
+  display: grid;
+  gap: var(--mp-space-4);
+}
+
+.mp-why__card {
+  padding: var(--mp-space-5);
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-line);
+  border-radius: var(--mp-radius-md);
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+  transition: border-color var(--mp-transition-fast);
+}
+
+.mp-why__card:hover {
+  border-color: var(--mp-color-blue-200);
+}
+
+.mp-why__icon {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mp-radius-sm);
+  margin-bottom: 0.4rem;
+}
+
+.mp-why__card:nth-child(3n + 1) .mp-why__icon {
+  background: var(--mp-color-blue-100);
+  color: var(--mp-color-blue-700);
+}
+
+.mp-why__card:nth-child(3n + 2) .mp-why__icon {
+  background: var(--mp-color-green-100);
+  color: var(--mp-color-green-700);
+}
+
+.mp-why__card:nth-child(3n) .mp-why__icon {
+  background: var(--mp-color-pink-100);
+  color: var(--mp-color-pink-700);
+}
+
+.mp-why__title {
+  font-size: 1rem;
+  font-weight: var(--mp-font-weight-semibold);
+}
+
+.mp-why__text {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+/* ---------------------------------------------------------------- CTA blocks */
+.mp-cta {
+  text-align: center;
+}
+
+.mp-cta__title {
+  margin-top: var(--mp-space-3);
+  font-size: var(--mp-font-size-h2);
+}
+
+.mp-cta__title--inverse {
+  color: var(--mp-color-surface);
+}
+
+.mp-cta__text {
+  margin-top: var(--mp-space-3);
+  font-size: var(--mp-font-size-lead);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-ink-soft);
+  max-width: 56ch;
+  margin-inline: auto;
+}
+
+.mp-cta__text--inverse {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.mp-cta__actions {
+  justify-content: center;
+}
+
+/* Client access CTA display line. */
+.mp-client-cta__title {
+  margin-top: var(--mp-space-3);
+  font-size: clamp(1.75rem, 1.3rem + 2.4vw, 2.75rem);
+  font-weight: var(--mp-font-weight-semibold);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--mp-color-ink);
+}
+
+/* Dark ink closing section. */
+.mp-contact-cta {
+  background: var(--mp-color-ink);
+}
+
+/* ------------------------------------------------------------- Breakpoints */
+@media (min-width: 40em) {
+  .mp-why__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 64em) {
+  .mp-brand-intro {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+
+  .mp-why__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* -------------------------------------------------- creative services teaser */
+
+.mp-marketing-teaser__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.9rem;
+}
+
+.mp-marketing-teaser__card {
+  background: var(--mp-color-surface, #ffffff);
+  border: 1px solid var(--mp-color-line, #e6e6e2);
+  border-radius: var(--mp-radius-md, 10px);
+  padding: 1.25rem 1.25rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.mp-marketing-teaser__card--blue {
+  border-top: 3px solid var(--mp-color-blue-300, #9cc4da);
+}
+
+.mp-marketing-teaser__card--green {
+  border-top: 3px solid var(--mp-color-green-300, #a9c9b4);
+}
+
+.mp-marketing-teaser__card--pink {
+  border-top: 3px solid var(--mp-color-pink-300, #dba9b2);
+}
+
+.mp-marketing-teaser__name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mp-color-ink, #22282b);
+}
+
+.mp-marketing-teaser__price {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--mp-color-blue-700, #35596f);
+}
+
+.mp-marketing-teaser__price span {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--mp-color-ink-muted, #68727a);
+}
+
+.mp-marketing-teaser__text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--mp-color-ink-soft, #4e565b);
+}
+
+/* ------------------------------------------------------------ home journal */
+
+.mp-home-blogs__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.9rem;
+}
+
+.mp-home-blogs__card {
+  background: var(--mp-color-surface, #ffffff);
+  border: 1px solid var(--mp-color-line, #e6e6e2);
+  border-radius: var(--mp-radius-md, 10px);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mp-home-blogs__card:hover {
+  border-color: var(--mp-color-blue-300, #9cc4da);
+  box-shadow: 0 10px 26px rgba(26, 31, 34, 0.08);
+}
+
+.mp-home-blogs__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  height: 100%;
+  text-decoration: none;
+}
+
+.mp-home-blogs__meta {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mp-color-ink-muted, #68727a);
+}
+
+.mp-home-blogs__title {
+  margin: 0;
+  font-family: var(--mp-font-display, serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--mp-color-ink, #22282b);
+}
+
+.mp-home-blogs__excerpt {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--mp-color-ink-soft, #4e565b);
+}
+
+.mp-home-blogs__more {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--mp-color-blue-700, #35596f);
+}
+
+.mp-home-blogs__card.is-loading {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}

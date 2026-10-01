@@ -1,0 +1,58 @@
+/* ==========================================================================
+   MARKIPIE · Legal pages
+   Privacy Policy and Terms & Conditions structure.
+   ========================================================================== */
+
+.mp-legal__intro {
+  font-size: var(--mp-font-size-lead);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-ink-soft);
+  max-width: 62ch;
+}
+
+.mp-legal__sections {
+  margin-top: var(--mp-space-6);
+  display: grid;
+  gap: var(--mp-space-5);
+}
+
+.mp-legal__section {
+  border-top: 1px solid var(--mp-color-line);
+  padding-top: var(--mp-space-4);
+}
+
+.mp-legal__heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--mp-space-3);
+  font-size: 1.1875rem;
+  font-weight: var(--mp-font-weight-semibold);
+}
+
+.mp-legal__index {
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  letter-spacing: 0.08em;
+  color: var(--mp-color-blue-600);
+}
+
+.mp-legal__text {
+  margin-top: var(--mp-space-3);
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+/* Multi-paragraph sections and the last-updated line. */
+.mp-legal__updated {
+  margin: 0 0 2rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mp-color-ink-muted, #68727a);
+}
+
+.mp-legal__section .mp-legal__text + .mp-legal__text {
+  margin-top: 0.9rem;
+}

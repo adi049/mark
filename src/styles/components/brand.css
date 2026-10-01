@@ -1,0 +1,30 @@
+/* ==========================================================================
+   MARKIPIE · Brand lockup
+   Used in the navbar, footer and admin header. Renders the official logo
+   image, or the wordmark as a text fallback.
+   ========================================================================== */
+
+.mp-brand {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.mp-brand__logo {
+  height: 32px;
+  width: auto;
+}
+
+.mp-brand__wordmark {
+  font-family: var(--mp-font-display);
+  font-size: 1.125rem;
+  font-weight: var(--mp-font-weight-semibold);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mp-color-ink);
+}
+
+/* Slightly larger lockup for the footer. */
+.mp-brand--footer .mp-brand__logo {
+  height: 30px;
+}

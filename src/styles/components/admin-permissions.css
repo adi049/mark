@@ -1,0 +1,417 @@
+/* ============================================================================
+   Admin event permissions + photo selection (Phase 9)
+   Extends the existing admin card language: quiet surfaces, deep charcoal
+   values, light blue accents, green for the studio's own selections.
+   ============================================================================ */
+
+/* ------------------------------------------------- payment + permissions */
+
+.mp-adm-perm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.mp-adm-perm__error {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #a03d3d;
+}
+
+.mp-adm-perm__summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.6rem;
+}
+
+.mp-adm-perm__cell {
+  background: var(--mp-color-surface-alt, #f4f4f1);
+  border: 1px solid var(--mp-color-line, #e6e6e2);
+  border-radius: var(--mp-radius-sm, 6px);
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.mp-adm-perm__cell-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mp-color-ink-muted, #68727a);
+}
+
+.mp-adm-perm__cell-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mp-color-ink, #22282b);
+}
+
+.mp-adm-perm__pay {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.mp-adm-perm__pay--unpaid {
+  color: #a03d3d;
+}
+
+.mp-adm-perm__pay--partial {
+  color: #9a6b2f;
+}
+
+.mp-adm-perm__pay--paid {
+  color: var(--mp-color-green-700, #41684d);
+}
+
+.mp-adm-perm__block {
+  border-top: 1px solid var(--mp-color-line, #e6e6e2);
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.mp-adm-perm__block-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--mp-color-ink, #22282b);
+}
+
+.mp-adm-perm__block-note {
+  margin: -0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--mp-color-ink-muted, #68727a);
+}
+
+.mp-adm-perm__pay-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mp-adm-perm__pay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.4rem;
+  padding: 0 1.1rem;
+  border-radius: var(--mp-radius-sm, 6px);
+  border: 1px solid var(--mp-color-line-strong, #d5d5cf);
+  background: var(--mp-color-surface, #ffffff);
+  color: var(--mp-color-ink-soft, #4e565b);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.mp-adm-perm__pay-btn:hover:not(:disabled) {
+  border-color: var(--mp-color-blue-300, #9cc4da);
+}
+
+.mp-adm-perm__pay-btn.is-active {
+  background: var(--mp-color-blue-600, #43708e);
+  border-color: var(--mp-color-blue-700, #35596f);
+  color: #ffffff;
+}
+
+.mp-adm-perm__pay-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.mp-adm-perm__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--mp-color-line, #e6e6e2);
+}
+
+.mp-adm-perm__row:last-of-type {
+  border-bottom: none;
+}
+
+.mp-adm-perm__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.mp-adm-perm__row-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--mp-color-ink, #22282b);
+}
+
+.mp-adm-perm__row-note {
+  font-size: 0.75rem;
+  color: var(--mp-color-ink-muted, #68727a);
+}
+
+.mp-adm-perm__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.mp-adm-perm__switch:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.mp-adm-perm__switch-track {
+  display: block;
+  width: 2.4rem;
+  height: 1.3rem;
+  border-radius: 999px;
+  background: var(--mp-color-line-strong, #d5d5cf);
+  position: relative;
+  transition: background 0.15s ease;
+}
+
+.mp-adm-perm__switch.is-on .mp-adm-perm__switch-track {
+  background: var(--mp-color-green-600, #4f7d5c);
+}
+
+.mp-adm-perm__switch-thumb {
+  display: block;
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(26, 31, 34, 0.25);
+  transition: transform 0.15s ease;
+}
+
+.mp-adm-perm__switch.is-on .mp-adm-perm__switch-thumb {
+  transform: translateX(1.1rem);
+}
+
+.mp-adm-perm__switch-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--mp-color-ink-soft, #4e565b);
+  min-width: 2rem;
+  text-align: left;
+}
+
+.mp-adm-perm__meta {
+  display: flex;
+  gap: 1.75rem;
+  flex-wrap: wrap;
+  margin: 0.25rem 0 0;
+}
+
+.mp-adm-perm__meta dt {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mp-color-ink-muted, #68727a);
+}
+
+.mp-adm-perm__meta dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: var(--mp-color-ink, #22282b);
+}
+
+/* ------------------------------------------------------- photo selection */
+
+.mp-adm-sel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.mp-adm-sel__state {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--mp-color-ink-muted, #68727a);
+}
+
+.mp-adm-sel__stats {
+  margin: 0;
+}
+
+.mp-adm-sel__filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mp-adm-sel__filter {
+  min-height: 2.2rem;
+  padding: 0 0.9rem;
+  border-radius: var(--mp-radius-sm, 6px);
+  border: 1px solid var(--mp-color-line-strong, #d5d5cf);
+  background: var(--mp-color-surface, #ffffff);
+  color: var(--mp-color-ink-soft, #4e565b);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.mp-adm-sel__filter:hover {
+  border-color: var(--mp-color-blue-300, #9cc4da);
+}
+
+.mp-adm-sel__filter.is-active {
+  background: var(--mp-color-ink, #22282b);
+  border-color: var(--mp-color-ink, #22282b);
+  color: #ffffff;
+}
+
+.mp-adm-sel__bulk {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  background: var(--mp-color-blue-50, #f1f7fb);
+  border: 1px solid var(--mp-color-blue-100, #dcecf5);
+  border-radius: var(--mp-radius-sm, 6px);
+  padding: 0.55rem 0.75rem;
+}
+
+.mp-adm-sel__bulk-count {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--mp-color-blue-700, #35596f);
+  margin-right: 0.35rem;
+}
+
+.mp-adm-sel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.6rem;
+}
+
+.mp-adm-sel__item {
+  position: relative;
+  margin: 0;
+  border-radius: var(--mp-radius-sm, 6px);
+  overflow: hidden;
+  background: var(--mp-color-surface-alt, #f4f4f1);
+  aspect-ratio: 4 / 3;
+}
+
+.mp-adm-sel__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mp-adm-sel__item.is-marked {
+  outline: 2px solid var(--mp-color-green-600, #4f7d5c);
+  outline-offset: -2px;
+}
+
+.mp-adm-sel__check,
+.mp-adm-sel__album {
+  position: absolute;
+  top: 0.4rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mp-radius-xs, 4px);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(34, 40, 43, 0.55);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.mp-adm-sel__check {
+  left: 0.4rem;
+}
+
+.mp-adm-sel__album {
+  right: 0.4rem;
+}
+
+.mp-adm-sel__check:hover,
+.mp-adm-sel__album:hover {
+  background: rgba(34, 40, 43, 0.8);
+}
+
+.mp-adm-sel__check.is-on {
+  background: var(--mp-color-blue-600, #43708e);
+  border-color: var(--mp-color-blue-600, #43708e);
+}
+
+.mp-adm-sel__album.is-on {
+  background: var(--mp-color-green-600, #4f7d5c);
+  border-color: var(--mp-color-green-600, #4f7d5c);
+}
+
+.mp-adm-sel__album:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.mp-adm-sel__reaction {
+  position: absolute;
+  bottom: 0.4rem;
+  left: 0.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mp-radius-xs, 4px);
+  background: var(--mp-color-blue-600, #43708e);
+  color: #ffffff;
+}
+
+.mp-adm-sel__reaction--down {
+  background: #a03d3d;
+}
+
+.mp-adm-sel__more {
+  display: flex;
+  justify-content: center;
+  padding: 0.4rem 0;
+}
+
+/* ------------------------------------------------------------- responsive */
+
+@media (max-width: 48em) {
+  .mp-adm-perm__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .mp-adm-sel__grid {
+    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  }
+
+  .mp-adm-perm__summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

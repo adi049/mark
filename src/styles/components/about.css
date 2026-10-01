@@ -1,0 +1,213 @@
+/* ==========================================================================
+   MARKIPIE · About page
+   ========================================================================== */
+
+/* Stats row under the page hero */
+.mp-about-intro__stats {
+  padding-block: var(--mp-space-6) 0;
+}
+
+.mp-about-intro__stats .mp-hero__stats {
+  margin-top: 0;
+}
+
+/* Story */
+.mp-about-story {
+  display: grid;
+  gap: var(--mp-space-6);
+  align-items: center;
+}
+
+.mp-about-story__figure {
+  border-radius: var(--mp-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--mp-color-line);
+  box-shadow: var(--mp-shadow-sm);
+}
+
+.mp-about-story__figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+/* Craft rows */
+.mp-about-craft {
+  display: grid;
+  gap: var(--mp-space-7);
+}
+
+.mp-about-craft__row {
+  display: grid;
+  gap: var(--mp-space-4);
+  align-items: center;
+}
+
+.mp-about-craft__figure {
+  border-radius: var(--mp-radius-md);
+  overflow: hidden;
+  border: 1px solid var(--mp-color-line);
+}
+
+.mp-about-craft__figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.mp-about-craft__body {
+  display: grid;
+  gap: var(--mp-space-3);
+}
+
+.mp-about-craft__title {
+  font-size: var(--mp-font-size-h3);
+}
+
+.mp-about-craft__text {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+/* Team cards */
+.mp-about-studio {
+  display: grid;
+  gap: var(--mp-space-4);
+}
+
+.mp-team-card {
+  padding: var(--mp-space-5);
+  border: 1px solid;
+  border-radius: var(--mp-radius-md);
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+}
+
+.mp-team-card--blue {
+  background: var(--mp-color-blue-50);
+  border-color: var(--mp-color-blue-200);
+}
+
+.mp-team-card--green {
+  background: var(--mp-color-green-50);
+  border-color: var(--mp-color-green-200);
+}
+
+.mp-team-card--pink {
+  background: var(--mp-color-pink-50);
+  border-color: var(--mp-color-pink-200);
+}
+
+.mp-team-card__title {
+  font-size: 1.0625rem;
+  font-weight: var(--mp-font-weight-semibold);
+}
+
+.mp-team-card__text {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-team-card__note {
+  margin-top: 0.5rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed var(--mp-color-line-strong);
+  font-size: var(--mp-font-size-xs);
+  color: var(--mp-color-ink-muted);
+}
+
+@media (min-width: 64em) {
+  .mp-about-story {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+
+  .mp-about-craft__row {
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: var(--mp-space-6);
+  }
+
+  .mp-about-craft__row--flip {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+
+  .mp-about-craft__row--flip .mp-about-craft__figure {
+    order: 2;
+  }
+
+  .mp-about-studio {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* --------------------------------------------------------- story longform */
+
+.mp-about-story__body {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.mp-about-story__body p {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: var(--mp-color-ink-soft, #4e565b);
+}
+
+.mp-about-story__body p:first-child {
+  font-size: 1.12rem;
+  color: var(--mp-color-ink, #22282b);
+}
+
+/* --------------------------------------------------------- craft timeline */
+
+.mp-about-craft__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.9rem;
+  counter-reset: craft-step;
+}
+
+.mp-about-craft__step {
+  position: relative;
+  background: var(--mp-color-surface, #ffffff);
+  border: 1px solid var(--mp-color-line, #e6e6e2);
+  border-radius: var(--mp-radius-md, 10px);
+  padding: 1.5rem 1.3rem 1.25rem;
+  counter-increment: craft-step;
+}
+
+.mp-about-craft__step::before {
+  content: counter(craft-step, decimal-leading-zero);
+  display: block;
+  font-family: var(--mp-font-display, Georgia, serif);
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--mp-color-blue-300, #9cc4da);
+  margin-bottom: 0.7rem;
+}
+
+.mp-about-craft__step:nth-child(2)::before {
+  color: var(--mp-color-green-300, #a5cbb0);
+}
+
+.mp-about-craft__step:nth-child(3)::before {
+  color: var(--mp-color-pink-300, #dba9b2);
+}
+
+.mp-about-craft__step h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--mp-color-ink, #22282b);
+}
+
+.mp-about-craft__step p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--mp-color-ink-soft, #4e565b);
+}

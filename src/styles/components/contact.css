@@ -1,0 +1,104 @@
+/* ==========================================================================
+   MARKIPIE · Contact page
+   Channel cards and the enquiry form structure.
+   ========================================================================== */
+
+.mp-contact__channels {
+  display: grid;
+  gap: var(--mp-space-4);
+}
+
+.mp-channel-card {
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-line);
+  border-radius: var(--mp-radius-md);
+  padding: var(--mp-space-5);
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.mp-channel-card__icon {
+  width: 46px;
+  height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mp-radius-sm);
+}
+
+.mp-channel-card--blue .mp-channel-card__icon {
+  background: var(--mp-color-blue-100);
+  color: var(--mp-color-blue-700);
+}
+
+.mp-channel-card--green .mp-channel-card__icon {
+  background: var(--mp-color-green-100);
+  color: var(--mp-color-green-700);
+}
+
+.mp-channel-card--pink .mp-channel-card__icon {
+  background: var(--mp-color-pink-100);
+  color: var(--mp-color-pink-700);
+}
+
+.mp-channel-card__title {
+  margin-top: 0.4rem;
+  font-size: 1.125rem;
+  font-weight: var(--mp-font-weight-semibold);
+}
+
+.mp-channel-card__detail {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-channel-card__actions {
+  margin-top: 0.65rem;
+}
+
+/* Form */
+.mp-contact__form-title {
+  font-size: var(--mp-font-size-h3);
+}
+
+.mp-contact__form-hint {
+  margin-top: 0.5rem;
+  margin-bottom: var(--mp-space-5);
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-muted);
+}
+
+.mp-form {
+  display: grid;
+  gap: var(--mp-space-4);
+}
+
+.mp-form__row {
+  display: grid;
+  gap: var(--mp-space-4);
+}
+
+.mp-form__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-4);
+}
+
+.mp-form__note {
+  font-size: var(--mp-font-size-sm);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-green-700);
+  max-width: 46ch;
+}
+
+@media (min-width: 40em) {
+  .mp-contact__channels {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .mp-form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

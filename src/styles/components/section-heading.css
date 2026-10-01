@@ -1,0 +1,26 @@
+/* ==========================================================================
+   MARKIPIE · Section heading
+   Eyebrow, title and optional description block for page sections.
+   ========================================================================== */
+
+.mp-section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mp-space-3);
+  max-width: 62ch;
+  margin-bottom: var(--mp-space-6);
+}
+
+.mp-section-heading__title {
+  font-size: var(--mp-font-size-h2);
+}
+
+.mp-section-heading__desc {
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-section-heading--center {
+  margin-inline: auto;
+  text-align: center;
+  align-items: center;
+}

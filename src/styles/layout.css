@@ -1,0 +1,61 @@
+/* ==========================================================================
+   MARKIPIE · Layout primitives
+   App shell, containers, sections and responsive grids. Mobile first.
+   ========================================================================== */
+
+/* App shell keeps the footer at the bottom of short pages. */
+.mp-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mp-app__main {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+/* Containers */
+.mp-container {
+  width: 100%;
+  max-width: var(--mp-container-max);
+  margin-inline: auto;
+  padding-inline: var(--mp-container-pad);
+}
+
+.mp-container--narrow {
+  max-width: var(--mp-container-narrow);
+}
+
+.mp-container--wide {
+  max-width: var(--mp-container-wide);
+}
+
+/* Sections */
+.mp-section {
+  padding-block: var(--mp-section-padding);
+}
+
+.mp-section--alt {
+  background: var(--mp-color-surface-alt);
+}
+
+.mp-section--blue {
+  background: var(--mp-color-blue-50);
+}
+
+.mp-section--green {
+  background: var(--mp-color-green-50);
+}
+
+.mp-section--pink {
+  background: var(--mp-color-pink-50);
+}
+
+/* Auto-fit grid. Set --mp-grid-min on the instance to control the smallest
+   column width; columns then wrap naturally at every screen size. */
+.mp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--mp-grid-min, 260px)), 1fr));
+  gap: var(--mp-space-5);
+}

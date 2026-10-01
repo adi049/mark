@@ -1,0 +1,19 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Local environment files (real values never belong in git)
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor and OS files
+.DS_Store
+.idea

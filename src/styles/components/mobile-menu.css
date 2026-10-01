@@ -1,0 +1,190 @@
+/* ==========================================================================
+   MARKIPIE · Mobile menu
+   Full screen overlay with a numbered editorial link list. Closes on
+   navigation, Escape and the close button. Body scroll is locked by the
+   component while open.
+   ========================================================================== */
+
+.mp-mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--mp-color-bg);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.mp-mobile-menu__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem var(--mp-container-pad);
+  background: var(--mp-color-bg);
+  border-bottom: 1px solid var(--mp-color-line);
+}
+
+.mp-mobile-menu__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--mp-radius-full);
+  border: 1px solid var(--mp-color-line-strong);
+  color: var(--mp-color-ink);
+  background: var(--mp-color-surface);
+  transition:
+    background-color var(--mp-transition-fast),
+    color var(--mp-transition-fast);
+}
+
+.mp-mobile-menu__close:hover {
+  background: var(--mp-color-ink);
+  color: #ffffff;
+}
+
+.mp-mobile-menu__close:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+/* Numbered editorial list */
+.mp-mobile-menu__nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.mp-mobile-menu__list {
+  list-style: none;
+  width: 100%;
+  max-width: 30rem;
+  margin-inline: auto;
+  padding: var(--mp-space-6) var(--mp-container-pad);
+  display: grid;
+}
+
+.mp-mobile-menu__link {
+  display: flex;
+  align-items: baseline;
+  gap: var(--mp-space-4);
+  padding: 0.85rem 0.25rem;
+  border-bottom: 1px solid var(--mp-color-line);
+  font-family: var(--mp-font-display);
+  font-size: clamp(1.375rem, 1.15rem + 1.8vw, 1.75rem);
+  font-weight: var(--mp-font-weight-medium);
+  color: var(--mp-color-ink-soft);
+  transition:
+    color var(--mp-transition-fast),
+    padding-left var(--mp-transition-fast);
+}
+
+.mp-mobile-menu__link:hover {
+  color: var(--mp-color-ink);
+  padding-left: 0.6rem;
+}
+
+.mp-mobile-menu__link.is-active {
+  color: var(--mp-color-ink);
+}
+
+.mp-mobile-menu__index {
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  letter-spacing: 0.08em;
+  color: var(--mp-color-ink-faint);
+  min-width: 2ch;
+  transition: color var(--mp-transition-fast);
+}
+
+.mp-mobile-menu__link:hover .mp-mobile-menu__index,
+.mp-mobile-menu__link.is-active .mp-mobile-menu__index {
+  color: var(--mp-color-blue-600);
+}
+
+/* Client Access carries a quiet blue dot. */
+.mp-mobile-menu__link--client .mp-mobile-menu__label::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-color-blue-400);
+  margin-left: 0.65rem;
+  vertical-align: middle;
+}
+
+.mp-mobile-menu__link:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+  border-radius: var(--mp-radius-sm);
+}
+
+/* Contact row */
+.mp-mobile-menu__foot {
+  padding: var(--mp-space-5) var(--mp-container-pad) var(--mp-space-6);
+  border-top: 1px solid var(--mp-color-line);
+  background: var(--mp-color-surface);
+}
+
+.mp-mobile-menu__foot-label {
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--mp-tracking-wide);
+  color: var(--mp-color-ink-muted);
+  margin-bottom: var(--mp-space-3);
+}
+
+.mp-mobile-menu__contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.mp-mobile-menu__contact-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--mp-color-line-strong);
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-color-surface);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-medium);
+  color: var(--mp-color-ink-soft);
+  transition:
+    color var(--mp-transition-fast),
+    border-color var(--mp-transition-fast);
+}
+
+.mp-mobile-menu__contact-link:hover {
+  color: var(--mp-color-ink);
+  border-color: var(--mp-color-ink-faint);
+}
+
+.mp-mobile-menu__contact-link:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+/* Short screens: keep everything reachable. */
+@media (max-height: 34em) {
+  .mp-mobile-menu__nav {
+    align-items: flex-start;
+  }
+
+  .mp-mobile-menu__list {
+    padding-block: var(--mp-space-4);
+  }
+
+  .mp-mobile-menu__link {
+    padding-block: 0.55rem;
+    font-size: 1.2rem;
+  }
+}

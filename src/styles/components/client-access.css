@@ -1,0 +1,164 @@
+/* ==========================================================================
+   MARKIPIE · Client access page
+   Three entry method cards. Visual structure only: buttons answer with an
+   honest "next phase" note.
+   ========================================================================== */
+
+.mp-client-access__grid {
+  display: grid;
+  gap: var(--mp-space-4);
+}
+
+.mp-access-card {
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-line);
+  border-top: 3px solid;
+  border-radius: var(--mp-radius-md);
+  padding: var(--mp-space-5);
+  display: grid;
+  gap: var(--mp-space-3);
+  align-content: start;
+  scroll-margin-top: calc(var(--mp-navbar-height) + 1rem);
+}
+
+.mp-access-card--blue {
+  border-top-color: var(--mp-color-blue-300);
+}
+
+.mp-access-card--green {
+  border-top-color: var(--mp-color-green-300);
+}
+
+.mp-access-card--pink {
+  border-top-color: var(--mp-color-pink-300);
+}
+
+.mp-access-card__icon {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mp-radius-sm);
+}
+
+.mp-access-card--blue .mp-access-card__icon {
+  background: var(--mp-color-blue-100);
+  color: var(--mp-color-blue-700);
+}
+
+.mp-access-card--green .mp-access-card__icon {
+  background: var(--mp-color-green-100);
+  color: var(--mp-color-green-700);
+}
+
+.mp-access-card--pink .mp-access-card__icon {
+  background: var(--mp-color-pink-100);
+  color: var(--mp-color-pink-700);
+}
+
+.mp-access-card__title {
+  font-size: 1.125rem;
+  font-weight: var(--mp-font-weight-semibold);
+}
+
+.mp-access-card__text {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-access-card__fields {
+  margin-top: 0.4rem;
+  display: grid;
+  gap: var(--mp-space-3);
+  justify-items: start;
+}
+
+.mp-access-card__fields .mp-field {
+  width: 100%;
+}
+
+.mp-access-card__note {
+  margin-top: 0.4rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--mp-color-blue-50);
+  border: 1px solid var(--mp-color-blue-100);
+  border-radius: var(--mp-radius-sm);
+  font-size: var(--mp-font-size-xs);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-access-card__note--plain {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-top: 0;
+}
+
+.mp-access-card__note--error {
+  background: var(--mp-color-pink-50);
+  border-color: var(--mp-color-pink-200);
+  color: var(--mp-color-pink-700);
+}
+
+/* Event details shown after a successful code lookup. */
+.mp-access-result {
+  width: 100%;
+  margin-top: 0.6rem;
+  padding: var(--mp-space-4);
+  background: var(--mp-color-green-50);
+  border: 1px solid var(--mp-color-green-200);
+  border-radius: var(--mp-radius-sm);
+  display: grid;
+  gap: var(--mp-space-3);
+  text-align: left;
+}
+
+.mp-access-result__head {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-green-700);
+}
+
+.mp-access-result__list {
+  margin: 0;
+  display: grid;
+  gap: var(--mp-space-2);
+}
+
+.mp-access-result__list > div {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: var(--mp-space-2);
+  align-items: baseline;
+}
+
+.mp-access-result__list dt {
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--mp-color-ink-muted);
+}
+
+.mp-access-result__list dd {
+  margin: 0;
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink);
+}
+
+.mp-access-result__note {
+  font-size: var(--mp-font-size-xs);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-ink-soft);
+}
+
+@media (min-width: 64em) {
+  .mp-client-access__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

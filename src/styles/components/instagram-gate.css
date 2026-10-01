@@ -1,0 +1,230 @@
+/* ============================================================================
+   Instagram engagement gate (Phase 8)
+   One premium overlay between event validation and the client gallery.
+   Uses the same palette tokens as the rest of the site: soft light blue,
+   white, deep charcoal. No Instagram branding beyond a small icon.
+   ============================================================================ */
+
+.mp-ig {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(38, 42, 47, 0.62);
+  backdrop-filter: blur(3px);
+  overflow-y: auto;
+}
+
+.mp-ig__card {
+  width: min(30rem, 100%);
+  background: var(--mp-color-surface);
+  border-radius: var(--mp-radius-md);
+  box-shadow: var(--mp-shadow-lg);
+  padding: 2.5rem 2.25rem 2.25rem;
+  text-align: center;
+  margin: auto;
+}
+
+.mp-ig__brand {
+  margin: 0 0 1.6rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em; /* balance the tracking on centered text */
+  color: var(--mp-color-blue-600);
+}
+
+.mp-ig__eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mp-color-blue-600);
+}
+
+.mp-ig__title {
+  margin: 0 0 0.35rem;
+  font-family: var(--mp-font-display);
+  font-size: 1.45rem;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--mp-color-ink);
+}
+
+.mp-ig__event {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+  color: var(--mp-color-ink-muted);
+}
+
+/* CTA ------------------------------------------------------------------ */
+
+.mp-ig__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.75rem;
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-color-blue-600);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  border: 1px solid var(--mp-blue-700, #35586f);
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.mp-ig__cta:hover,
+.mp-ig__cta:focus-visible {
+  background: var(--mp-blue-700, #35586f);
+  transform: translateY(-1px);
+}
+
+.mp-ig__cta:focus-visible {
+  outline: 2px solid var(--mp-color-blue-400);
+  outline-offset: 2px;
+}
+
+/* Gentle attention pulse while the countdown runs; stops once the
+   countdown is over and never animates under reduced motion. */
+.mp-ig__cta[data-counting='true'] {
+  animation: mp-ig-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes mp-ig-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(67, 112, 142, 0.32);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(67, 112, 142, 0);
+  }
+}
+
+/* Countdown ------------------------------------------------------------- */
+
+.mp-ig__countdown {
+  margin: 1.6rem 0 0.4rem;
+  min-height: 6.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.mp-ig__count {
+  font-family: var(--mp-font-display);
+  font-size: 4rem;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--mp-color-blue-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-ig__post-count {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--mp-color-ink);
+}
+
+.mp-ig__caption {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--mp-color-ink-muted);
+}
+
+.mp-ig__note {
+  margin: 1.1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--mp-color-ink-muted);
+}
+
+/* Continue -------------------------------------------------------------- */
+
+.mp-ig__continue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.75rem;
+  margin-top: 1.1rem;
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-color-green-600);
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: 1px solid var(--mp-color-green-700);
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.mp-ig__continue:hover,
+.mp-ig__continue:focus-visible {
+  background: var(--mp-color-green-700);
+  transform: translateY(-1px);
+}
+
+.mp-ig__continue:focus-visible {
+  outline: 2px solid var(--mp-color-green-300);
+  outline-offset: 2px;
+}
+
+/* Motion preferences ---------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mp-ig {
+    backdrop-filter: none;
+  }
+
+  .mp-ig__cta,
+  .mp-ig__continue {
+    transition: none;
+  }
+
+  .mp-ig__cta:hover,
+  .mp-ig__cta:focus-visible,
+  .mp-ig__continue:hover,
+  .mp-ig__continue:focus-visible {
+    transform: none;
+  }
+
+  .mp-ig__cta[data-counting='true'] {
+    animation: none;
+  }
+}
+
+/* Mobile ---------------------------------------------------------------- */
+
+@media (max-width: 30em) {
+  .mp-ig {
+    padding: 1rem;
+    align-items: flex-start;
+  }
+
+  .mp-ig__card {
+    padding: 2rem 1.4rem 1.75rem;
+  }
+
+  .mp-ig__title {
+    font-size: 1.25rem;
+  }
+
+  .mp-ig__count {
+    font-size: 3.4rem;
+  }
+
+  .mp-ig__cta,
+  .mp-ig__continue {
+    width: 100%;
+  }
+}

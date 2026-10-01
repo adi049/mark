@@ -1,0 +1,156 @@
+/* ==========================================================================
+   MARKIPIE · Footer
+   Brand column with contact channels, three link columns, legal line.
+   ========================================================================== */
+
+.mp-footer {
+  border-top: 1px solid var(--mp-color-line);
+  background: var(--mp-color-surface);
+  padding-block: var(--mp-space-8) var(--mp-space-6);
+}
+
+.mp-footer__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--mp-space-7);
+}
+
+.mp-footer__tagline {
+  margin-top: var(--mp-space-4);
+  font-size: var(--mp-font-size-sm);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-ink-muted);
+  max-width: 34ch;
+}
+
+/* Channel buttons */
+.mp-footer__channels {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: var(--mp-space-4);
+}
+
+.mp-footer__channel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--mp-radius-sm);
+  border: 1px solid var(--mp-color-line-strong);
+  background: var(--mp-color-surface);
+  color: var(--mp-color-ink-soft);
+  transition:
+    background-color var(--mp-transition-fast),
+    border-color var(--mp-transition-fast),
+    color var(--mp-transition-fast);
+}
+
+.mp-footer__channel--whatsapp:hover {
+  background: #128c7b;
+  border-color: #128c7b;
+  color: #ffffff;
+}
+
+.mp-footer__channel--call:hover {
+  background: var(--mp-color-ink);
+  border-color: var(--mp-color-ink);
+  color: #ffffff;
+}
+
+.mp-footer__channel--instagram:hover {
+  background: #e1306c;
+  border-color: #e1306c;
+  color: #ffffff;
+}
+
+.mp-footer__channel:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+/* Email: real link once configured, quiet note until then. */
+.mp-footer__email {
+  display: inline-block;
+  margin-top: var(--mp-space-4);
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+a.mp-footer__email:hover {
+  color: var(--mp-color-ink);
+}
+
+.mp-footer__email--pending {
+  font-size: var(--mp-font-size-xs);
+  font-style: italic;
+  color: var(--mp-color-ink-muted);
+}
+
+/* Link columns */
+.mp-footer__heading {
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--mp-tracking-wide);
+  color: var(--mp-color-ink-muted);
+  margin-bottom: var(--mp-space-3);
+}
+
+.mp-footer__list {
+  list-style: none;
+  display: grid;
+  gap: var(--mp-space-2);
+}
+
+.mp-footer__link {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+  transition: color var(--mp-transition-fast);
+}
+
+.mp-footer__link:hover {
+  color: var(--mp-color-ink);
+}
+
+.mp-footer__link:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+  border-radius: var(--mp-radius-xs);
+}
+
+.mp-footer__bottom {
+  margin-top: var(--mp-space-7);
+  padding-top: var(--mp-space-5);
+  border-top: 1px solid var(--mp-color-line);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--mp-space-3);
+  font-size: var(--mp-font-size-xs);
+  color: var(--mp-color-ink-muted);
+}
+
+/* Small tablets: two columns, brand on its own row */
+@media (min-width: 40em) {
+  .mp-footer__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mp-footer__brand {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Laptop and up: brand column plus three link columns */
+@media (min-width: 64em) {
+  .mp-footer__grid {
+    grid-template-columns: 2.2fr 1fr 1.2fr 1fr;
+    gap: var(--mp-space-8);
+  }
+
+  .mp-footer__brand {
+    grid-column: auto;
+  }
+}

@@ -1,0 +1,88 @@
+/* ==========================================================================
+   MARKIPIE · Typography
+   Fraunces carries display and headings, Inter carries body and interface.
+   ========================================================================== */
+
+h1,
+h2,
+h3 {
+  font-family: var(--mp-font-display);
+  font-weight: var(--mp-font-weight-medium);
+  line-height: var(--mp-leading-tight);
+  letter-spacing: var(--mp-tracking-tight);
+  color: var(--mp-color-ink);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--mp-font-size-h1);
+}
+
+h2 {
+  font-size: var(--mp-font-size-h2);
+}
+
+h3 {
+  font-size: var(--mp-font-size-h3);
+}
+
+h4 {
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-h4);
+  font-weight: var(--mp-font-weight-semibold);
+  line-height: var(--mp-leading-snug);
+  color: var(--mp-color-ink);
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Small uppercase label with a short rule, used above headings. */
+.mp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mp-space-2);
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  letter-spacing: var(--mp-tracking-wide);
+  text-transform: uppercase;
+  color: var(--mp-color-ink-muted);
+}
+
+.mp-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 1.25rem;
+  height: 1px;
+  background: var(--mp-color-blue-400);
+}
+
+.mp-eyebrow--center {
+  justify-content: center;
+}
+
+.mp-eyebrow--center::after {
+  content: '';
+  display: inline-block;
+  width: 1.25rem;
+  height: 1px;
+  background: var(--mp-color-blue-400);
+}
+
+/* Larger intro paragraph. */
+.mp-lead {
+  font-size: var(--mp-font-size-lead);
+  line-height: 1.6;
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-text-muted {
+  color: var(--mp-color-ink-muted);
+}
+
+/* Monospace helper for paths and technical values. */
+.mp-mono {
+  font-family: var(--mp-font-mono);
+}

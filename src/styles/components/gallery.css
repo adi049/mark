@@ -1,0 +1,111 @@
+/* ==========================================================================
+   MARKIPIE · Gallery page
+   Featured banner, working filter chips with counts, a CSS columns masonry
+   with hover scrims, and the lightbox.
+   ========================================================================== */
+
+/* Opening banner */
+.mp-gallery__banner {
+  border-radius: var(--mp-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--mp-color-line);
+  box-shadow: var(--mp-shadow-sm);
+  margin-bottom: var(--mp-space-6);
+}
+
+.mp-gallery__banner img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+}
+
+@media (max-width: 47.99em) {
+  .mp-gallery__banner img {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+.mp-gallery__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: var(--mp-space-6);
+}
+
+/* Masonry */
+.mp-gallery__grid {
+  columns: 1;
+  column-gap: var(--mp-space-4);
+}
+
+.mp-gallery__item {
+  display: block;
+  position: relative;
+  width: 100%;
+  margin-bottom: var(--mp-space-4);
+  padding: 0;
+  border: 1px solid var(--mp-color-line);
+  border-radius: var(--mp-radius-md);
+  overflow: hidden;
+  background: var(--mp-color-surface-alt);
+  cursor: zoom-in;
+  text-align: left;
+  break-inside: avoid;
+}
+
+.mp-gallery__item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: transform var(--mp-transition-slow);
+}
+
+.mp-gallery__item:hover img {
+  transform: scale(1.04);
+}
+
+/* Scrim keeps the label legible over any image. */
+.mp-gallery__item-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(26, 31, 34, 0.4), transparent 40%);
+  opacity: 0;
+  transition: opacity var(--mp-transition-base);
+}
+
+.mp-gallery__item:hover .mp-gallery__item-scrim,
+.mp-gallery__item:focus-visible .mp-gallery__item-scrim {
+  opacity: 1;
+}
+
+.mp-gallery__item:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+.mp-gallery__item-label {
+  position: absolute;
+  left: 0.65rem;
+  bottom: 0.65rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: var(--mp-radius-sm);
+  background: color-mix(in srgb, #ffffff 86%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-medium);
+  color: var(--mp-color-ink-soft);
+}
+
+@media (min-width: 40em) {
+  .mp-gallery__grid {
+    columns: 2;
+  }
+}
+
+@media (min-width: 64em) {
+  .mp-gallery__grid {
+    columns: 3;
+  }
+}

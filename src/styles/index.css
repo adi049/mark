@@ -1,0 +1,43 @@
+/* ==========================================================================
+   MARKIPIE · Global stylesheet
+   Import order matters: tokens first, then element defaults, then shared
+   blocks, then components, then page and section styles.
+   ========================================================================== */
+
+@import './variables.css';
+@import './base.css';
+@import './typography.css';
+@import './layout.css';
+@import './utilities.css';
+
+@import './components/brand.css';
+@import './components/button.css';
+@import './components/card.css';
+@import './components/section-heading.css';
+@import './components/blocks.css';
+@import './components/page-hero.css';
+@import './components/navbar.css';
+@import './components/mobile-menu.css';
+@import './components/footer.css';
+@import './components/floating-contact.css';
+@import './components/contact-actions.css';
+@import './components/lightbox.css';
+@import './components/admin.css';
+@import './components/transition.css';
+@import './components/intro.css';
+
+@import './components/home-hero.css';
+@import './components/home-sections.css';
+@import './components/packages.css';
+@import './components/about.css';
+@import './components/services.css';
+@import './components/client-access.css';
+@import './components/client-gallery.css';
+@import './components/face-scan.css';
+@import './components/instagram-gate.css';
+@import './components/admin-permissions.css';
+@import './components/gallery.css';
+@import './components/marketing.css';
+@import './components/blogs.css';
+@import './components/contact.css';
+@import './components/legal.css';

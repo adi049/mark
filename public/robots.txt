@@ -1,0 +1,6 @@
+# Markipie website robots
+# A sitemap entry is added once the production domain is final.
+
+User-agent: *
+Allow: /
+Disallow: /admin

@@ -1,0 +1,63 @@
+/* ==========================================================================
+   MARKIPIE · Opening intro
+   Full screen brand reveal shown while the site loads beneath it. Pure white
+   per the brand sequence. Movement is driven by Framer Motion; these styles
+   only handle layout and the shine gradient.
+   ========================================================================== */
+
+.mp-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* Wordmark frame. Width is capped so the logo keeps elegant presence on
+   large screens while staying fully visible from 320px up. */
+.mp-intro__logo {
+  position: relative;
+  width: min(86vw, 540px);
+}
+
+.mp-intro__piece {
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Simplified version for reduced motion. */
+.mp-intro__full-logo {
+  display: block;
+  width: min(86vw, 540px);
+  height: auto;
+}
+
+/* Shine sweep, clipped to the logo box. */
+.mp-intro__shine-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.mp-intro__shine {
+  position: absolute;
+  top: -10%;
+  left: 0;
+  width: 45%;
+  height: 120%;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0) 32%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(255, 255, 255, 0) 68%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  will-change: transform;
+}

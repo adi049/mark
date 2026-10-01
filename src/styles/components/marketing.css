@@ -1,0 +1,98 @@
+/* ==========================================================================
+   MARKIPIE · Marketing page
+   Price cards for the digital service packages.
+   ========================================================================== */
+
+.mp-marketing__grid {
+  display: grid;
+  gap: var(--mp-space-5);
+  align-items: stretch;
+}
+
+.mp-price-card {
+  position: relative;
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-line);
+  border-radius: var(--mp-radius-md);
+  padding: var(--mp-space-6) var(--mp-space-5);
+  display: grid;
+  gap: var(--mp-space-3);
+  align-content: start;
+}
+
+.mp-price-card--featured {
+  border-color: var(--mp-color-blue-300);
+  border-top: 3px solid var(--mp-color-blue-400);
+  box-shadow: var(--mp-shadow-md);
+}
+
+.mp-price-card__flag {
+  justify-self: start;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-color-blue-100);
+  color: var(--mp-color-blue-700);
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  letter-spacing: 0.04em;
+}
+
+.mp-price-card__name {
+  font-size: 1.25rem;
+  font-weight: var(--mp-font-weight-semibold);
+}
+
+.mp-price-card__price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mp-price-card__amount {
+  font-family: var(--mp-font-display);
+  font-size: 2rem;
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-ink);
+}
+
+.mp-price-card__unit {
+  font-size: var(--mp-font-size-xs);
+  color: var(--mp-color-ink-muted);
+}
+
+.mp-price-card__text {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-price-card__features {
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.4rem;
+}
+
+.mp-price-card__features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-price-card__features svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--mp-color-green-700);
+}
+
+.mp-price-card__actions {
+  margin-top: var(--mp-space-3);
+}
+
+@media (min-width: 48em) {
+  .mp-marketing__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

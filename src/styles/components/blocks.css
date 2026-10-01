@@ -1,0 +1,217 @@
+/* ==========================================================================
+   MARKIPIE · Shared blocks
+   Small reusable pieces used across pages: chips, text links, section
+   action rows and notes, pending panels, callouts, form fields and the
+   inverse eyebrow for dark sections.
+   ========================================================================== */
+
+/* Chip: filter buttons and small tags. Small rounded rectangles. */
+.mp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--mp-color-line-strong);
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-color-surface);
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-medium);
+  color: var(--mp-color-ink-soft);
+  cursor: pointer;
+  transition:
+    border-color var(--mp-transition-fast),
+    color var(--mp-transition-fast),
+    background-color var(--mp-transition-fast);
+}
+
+.mp-chip:hover {
+  border-color: var(--mp-color-blue-300);
+  color: var(--mp-color-ink);
+}
+
+.mp-chip.is-active {
+  background: var(--mp-color-ink);
+  border-color: var(--mp-color-ink);
+  color: #ffffff;
+}
+
+.mp-chip:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+/* Quiet count inside a filter chip. */
+.mp-chip__count {
+  font-size: var(--mp-font-size-xs);
+  color: var(--mp-color-ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-chip.is-active .mp-chip__count {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Text level link with a trailing arrow. */
+.mp-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-blue-700);
+  transition: color var(--mp-transition-fast);
+}
+
+.mp-text-link svg {
+  transition: transform var(--mp-transition-fast);
+}
+
+.mp-text-link:hover {
+  color: var(--mp-color-ink);
+}
+
+.mp-text-link:hover svg {
+  transform: translateX(2px);
+}
+
+.mp-text-link--muted {
+  color: var(--mp-color-ink-muted);
+}
+
+.mp-text-link:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+  border-radius: var(--mp-radius-xs);
+}
+
+/* Action rows under sections */
+.mp-section-actions {
+  margin-top: var(--mp-space-6);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--mp-space-3);
+}
+
+.mp-section-actions--center {
+  justify-content: center;
+}
+
+.mp-section-actions--split {
+  justify-content: space-between;
+}
+
+/* Quiet note under a section or grid */
+.mp-section-note {
+  margin-top: var(--mp-space-5);
+  font-size: var(--mp-font-size-xs);
+  color: var(--mp-color-ink-muted);
+}
+
+.mp-section-note--top {
+  margin: 0 0 var(--mp-space-5);
+}
+
+/* Pending content panel: honest placeholder blocks. */
+.mp-pending-panel {
+  padding: var(--mp-space-5);
+  border: 1px dashed var(--mp-color-line-strong);
+  border-radius: var(--mp-radius-md);
+  background: var(--mp-color-surface);
+}
+
+.mp-pending-panel__label {
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--mp-tracking-wide);
+  color: var(--mp-color-pending);
+  margin-bottom: var(--mp-space-2);
+}
+
+.mp-pending-panel__text {
+  font-size: var(--mp-font-size-sm);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-ink-soft);
+  max-width: 62ch;
+}
+
+/* Inline callout, used for the client access phase note. */
+.mp-callout {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.9rem 1.15rem;
+  background: var(--mp-color-blue-50);
+  border: 1px solid var(--mp-color-blue-100);
+  border-radius: var(--mp-radius-md);
+  margin-bottom: var(--mp-space-5);
+}
+
+.mp-callout svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--mp-color-blue-700);
+}
+
+.mp-callout p {
+  font-size: var(--mp-font-size-sm);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-ink-soft);
+  max-width: 72ch;
+}
+
+/* Form fields, shared by client access and contact. */
+.mp-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.mp-field__label {
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  letter-spacing: 0.02em;
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-field__input {
+  width: 100%;
+  height: 44px;
+  padding: 0 0.9rem;
+  border: 1px solid var(--mp-color-line-strong);
+  border-radius: var(--mp-radius-sm);
+  background: var(--mp-color-surface);
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink);
+  transition:
+    border-color var(--mp-transition-fast),
+    box-shadow var(--mp-transition-fast);
+}
+
+.mp-field__input::placeholder {
+  color: var(--mp-color-ink-faint);
+}
+
+.mp-field__input:focus {
+  outline: none;
+  border-color: var(--mp-color-blue-400);
+  box-shadow: 0 0 0 3px rgba(67, 112, 142, 0.16);
+}
+
+.mp-field__input--area {
+  height: auto;
+  min-height: 7.5rem;
+  padding: 0.75rem 0.9rem;
+  resize: vertical;
+}
+
+/* Eyebrow on dark ink sections. */
+.mp-eyebrow--inverse {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.mp-eyebrow--inverse::before,
+.mp-eyebrow--inverse::after {
+  background: var(--mp-color-blue-300);
+}

@@ -1,0 +1,28 @@
+/* ==========================================================================
+   MARKIPIE · Card
+   Moderate radius, hairline border, subtle shadow.
+   ========================================================================== */
+
+.mp-card {
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-line);
+  border-radius: var(--mp-radius-md);
+  box-shadow: var(--mp-shadow-sm);
+}
+
+.mp-card--pad {
+  padding: var(--mp-space-5);
+}
+
+.mp-card--hover {
+  transition:
+    transform var(--mp-transition-base),
+    box-shadow var(--mp-transition-base),
+    border-color var(--mp-transition-base);
+}
+
+.mp-card--hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mp-shadow-md);
+  border-color: var(--mp-color-blue-200);
+}

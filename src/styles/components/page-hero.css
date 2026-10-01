@@ -1,0 +1,26 @@
+/* ==========================================================================
+   MARKIPIE · Page hero
+   Shared opener band for inner pages: flat sky tint, hairline base.
+   ========================================================================== */
+
+.mp-page-hero {
+  background: var(--mp-color-blue-50);
+  border-bottom: 1px solid var(--mp-color-blue-100);
+  padding-block: clamp(2.75rem, 2rem + 3vw, 4.5rem) clamp(2.25rem, 1.75rem + 2vw, 3.25rem);
+}
+
+.mp-page-hero__title {
+  margin-top: var(--mp-space-3);
+  font-size: var(--mp-font-size-h1);
+  line-height: var(--mp-leading-tight);
+  letter-spacing: var(--mp-tracking-tight);
+  max-width: 18ch;
+}
+
+.mp-page-hero__description {
+  margin-top: var(--mp-space-4);
+  font-size: var(--mp-font-size-lead);
+  line-height: var(--mp-leading-body);
+  color: var(--mp-color-ink-soft);
+  max-width: 62ch;
+}

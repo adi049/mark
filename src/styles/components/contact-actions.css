@@ -1,0 +1,68 @@
+/* ==========================================================================
+   MARKIPIE · Contact actions
+   Inline labeled buttons for WhatsApp, call and Instagram. Default tone
+   sits on light surfaces, inverse tone on the dark ink section.
+   ========================================================================== */
+
+.mp-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.mp-contact-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  height: 44px;
+  padding: 0 1.15rem;
+  border-radius: var(--mp-radius-sm);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-semibold);
+  color: #ffffff;
+  box-shadow: var(--mp-shadow-sm);
+  transition:
+    transform var(--mp-transition-fast),
+    box-shadow var(--mp-transition-fast);
+}
+
+.mp-contact-action svg {
+  flex-shrink: 0;
+}
+
+.mp-contact-action:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--mp-shadow-md);
+}
+
+.mp-contact-action:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+/* Default tone */
+.mp-contact-actions--default .mp-contact-action--whatsapp {
+  background: #128c7b;
+}
+
+.mp-contact-actions--default .mp-contact-action--call {
+  background: var(--mp-color-ink);
+}
+
+.mp-contact-actions--default .mp-contact-action--instagram {
+  background: #e1306c;
+}
+
+/* Inverse tone, on the dark ink section */
+.mp-contact-actions--inverse .mp-contact-action--whatsapp {
+  background: #128c7b;
+}
+
+.mp-contact-actions--inverse .mp-contact-action--call {
+  background: #ffffff;
+  color: var(--mp-color-ink);
+}
+
+.mp-contact-actions--inverse .mp-contact-action--instagram {
+  background: #e1306c;
+}

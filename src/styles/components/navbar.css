@@ -1,0 +1,95 @@
+/* ==========================================================================
+   MARKIPIE · Navbar
+   Sticky and transparent over the page at the very top, then a soft blur,
+   hairline border and shadow once the page scrolls. Desktop links appear
+   at the lg breakpoint only: eight links do not fit below it. The mobile
+   hamburger opens the full screen menu.
+   ========================================================================== */
+
+.mp-navbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--mp-z-navbar);
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color var(--mp-transition-base),
+    border-color var(--mp-transition-base),
+    box-shadow var(--mp-transition-base);
+}
+
+/* Scrolled state: quiet frosted bar. */
+.mp-navbar.is-scrolled {
+  background: color-mix(in srgb, var(--mp-color-bg) 86%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom-color: var(--mp-color-line);
+  box-shadow: var(--mp-shadow-sm);
+}
+
+.mp-navbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mp-space-4);
+  min-height: var(--mp-navbar-height);
+}
+
+/* Desktop links, lg and up only. */
+.mp-navbar__nav {
+  display: none;
+  align-items: center;
+  gap: var(--mp-space-1);
+}
+
+.mp-navbar__link {
+  display: inline-block;
+  padding: var(--mp-space-2) 0.65rem;
+  border-radius: var(--mp-radius-sm);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-medium);
+  color: var(--mp-color-ink-soft);
+  transition:
+    color var(--mp-transition-fast),
+    background-color var(--mp-transition-fast);
+}
+
+.mp-navbar__link:hover {
+  color: var(--mp-color-ink);
+}
+
+.mp-navbar__link.is-active {
+  color: var(--mp-color-ink);
+  background: var(--mp-color-blue-50);
+}
+
+/* Hamburger, shown below lg. */
+.mp-navbar__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--mp-radius-sm);
+  color: var(--mp-color-ink);
+  transition: background-color var(--mp-transition-fast);
+}
+
+.mp-navbar__toggle:hover {
+  background: color-mix(in srgb, var(--mp-color-ink) 6%, transparent);
+}
+
+.mp-navbar__toggle:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+@media (min-width: 64em) {
+  .mp-navbar__nav {
+    display: flex;
+  }
+
+  .mp-navbar__toggle {
+    display: none;
+  }
+}

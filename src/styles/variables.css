@@ -1,0 +1,151 @@
+/* ==========================================================================
+   MARKIPIE · Design tokens
+   --------------------------------------------------------------------------
+   Single source of truth for colors, typography, spacing, radius, shadows,
+   transitions, container widths and breakpoints. Change values here and the
+   whole interface follows.
+
+   Breakpoints (mirrored by the media queries used across the stylesheets):
+     sm   640px   large phones, small tablets
+     md   768px   tablet
+     lg   1024px  laptop and desktop
+     xl   1280px  large desktop
+     2xl  1536px  wide screens
+
+   Media queries cannot read custom properties, so the values below are the
+   documented reference and the literals are repeated in queries. If a
+   breakpoint changes, update both this file and lib/constants.js.
+
+   All layouts are mobile first: base styles target small screens and media
+   queries scale up.
+   ========================================================================== */
+
+:root {
+  /* -------------------------------------------------------------- Color */
+  /* Core surfaces. Light, warm neutrals; never pure grey. */
+  --mp-color-bg: #fafaf8;            /* Mist · page background */
+  --mp-color-surface: #ffffff;       /* Paper · cards, panels */
+  --mp-color-surface-alt: #f4f4f1;   /* alternate section background */
+
+  /* Ink · text and dark UI. Deep charcoal, never pure black. */
+  --mp-color-ink: #22282b;           /* 14.3:1 on bg */
+  --mp-color-ink-strong: #1a1f22;    /* hover state for dark surfaces */
+  --mp-color-ink-soft: #4e565b;      /* secondary text · 7.1:1 on bg */
+  --mp-color-ink-muted: #68727a;     /* captions, meta · 4.7:1 on bg */
+  --mp-color-ink-faint: #a8b0b6;     /* decorative only, never for text */
+
+  /* Lines and borders */
+  --mp-color-line: #e6e6e2;
+  --mp-color-line-strong: #d5d5cf;
+
+  /* Sky · light blue. Tints for surfaces, deep tones for text and actions. */
+  --mp-color-blue-50: #f1f7fb;
+  --mp-color-blue-100: #dcecf5;
+  --mp-color-blue-200: #c0dceb;
+  --mp-color-blue-300: #9cc4da;
+  --mp-color-blue-400: #74a7c4;
+  --mp-color-blue-600: #43708e;      /* 5.3:1 on white · focus, small accents */
+  --mp-color-blue-700: #35596f;      /* 7.4:1 on white · links, text accents */
+
+  /* Sage · soft green */
+  --mp-color-green-50: #f2f7f3;
+  --mp-color-green-100: #e2efe5;
+  --mp-color-green-200: #c8e0ce;
+  --mp-color-green-300: #a5cbb0;
+  --mp-color-green-600: #4f7d5c;     /* 4.7:1 on white */
+  --mp-color-green-700: #41684d;     /* 6.3:1 on white */
+
+  /* Blush · soft pink */
+  --mp-color-pink-50: #faf4f5;
+  --mp-color-pink-100: #f5e6e9;
+  --mp-color-pink-200: #eacfd5;
+  --mp-color-pink-300: #dba9b2;
+  --mp-color-pink-600: #a05f6d;      /* 4.8:1 on white */
+  --mp-color-pink-700: #8e4e5d;      /* 6.1:1 on white */
+
+  /* Brand reference. Vivid blue from the official logo, used for the logo
+     itself. The interface intentionally uses the calmer Sky tones above so
+     photography stays the hero. */
+  --mp-color-logo-blue: #00c0e9;
+
+  /* Status */
+  --mp-color-success: var(--mp-color-green-700);
+  --mp-color-pending: #8a6d3b;       /* 4.8:1 on white */
+
+  /* --------------------------------------------------------- Typography */
+  --mp-font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --mp-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --mp-font-mono: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Fluid type scale, mobile first */
+  --mp-font-size-display: clamp(2.5rem, 1.75rem + 3vw, 4rem);
+  --mp-font-size-h1: clamp(2.125rem, 1.55rem + 2.4vw, 3.25rem);
+  --mp-font-size-h2: clamp(1.625rem, 1.28rem + 1.6vw, 2.375rem);
+  --mp-font-size-h3: clamp(1.3125rem, 1.14rem + 0.8vw, 1.625rem);
+  --mp-font-size-h4: 1.1875rem;
+  --mp-font-size-lead: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
+  --mp-font-size-body: 1rem;
+  --mp-font-size-sm: 0.875rem;
+  --mp-font-size-xs: 0.8125rem;
+
+  --mp-font-weight-regular: 400;
+  --mp-font-weight-medium: 500;
+  --mp-font-weight-semibold: 600;
+
+  --mp-leading-tight: 1.15;
+  --mp-leading-snug: 1.35;
+  --mp-leading-body: 1.65;
+
+  --mp-tracking-tight: -0.015em;
+  --mp-tracking-wide: 0.16em;
+
+  /* ------------------------------------------------------------- Spacing */
+  --mp-space-1: 0.25rem;
+  --mp-space-2: 0.5rem;
+  --mp-space-3: 0.75rem;
+  --mp-space-4: 1rem;
+  --mp-space-5: 1.5rem;
+  --mp-space-6: 2rem;
+  --mp-space-7: 3rem;
+  --mp-space-8: 4rem;
+  --mp-space-9: 6rem;
+  --mp-space-10: 8rem;
+  --mp-section-padding: clamp(3.5rem, 2rem + 6vw, 7rem);
+
+  /* -------------------------------------------------------------- Radius */
+  /* Moderate, editorial corners. The full radius is reserved for chips and
+     dots, never buttons. */
+  --mp-radius-xs: 4px;
+  --mp-radius-sm: 6px;
+  --mp-radius-md: 10px;
+  --mp-radius-lg: 16px;
+  --mp-radius-full: 999px;
+
+  /* ------------------------------------------------------------- Shadows */
+  --mp-shadow-sm: 0 1px 2px rgba(26, 31, 34, 0.05), 0 1px 3px rgba(26, 31, 34, 0.04);
+  --mp-shadow-md: 0 2px 4px rgba(26, 31, 34, 0.04), 0 8px 20px rgba(26, 31, 34, 0.07);
+  --mp-shadow-lg: 0 4px 8px rgba(26, 31, 34, 0.05), 0 16px 40px rgba(26, 31, 34, 0.1);
+
+  /* --------------------------------------------------------- Transitions */
+  --mp-transition-fast: 140ms ease-out;
+  --mp-transition-base: 240ms cubic-bezier(0.33, 0, 0.2, 1);
+  --mp-transition-slow: 420ms cubic-bezier(0.33, 0, 0.2, 1);
+
+  /* ---------------------------------------------------------- Containers */
+  --mp-container-pad: clamp(1.25rem, 4vw, 2.5rem);
+  --mp-container-max: 1200px;
+  --mp-container-narrow: 760px;
+  --mp-container-wide: 1440px;
+
+  /* -------------------------------------------------------------- Layout */
+  --mp-navbar-height: 64px;
+  --mp-z-navbar: 50;
+
+  /* --------------------------------------------------------- Breakpoints */
+  /* Reference values only; media queries repeat the literals. */
+  --mp-bp-sm: 40em;   /* 640px */
+  --mp-bp-md: 48em;   /* 768px */
+  --mp-bp-lg: 64em;   /* 1024px */
+  --mp-bp-xl: 80em;   /* 1280px */
+  --mp-bp-2xl: 96em;  /* 1536px */
+}

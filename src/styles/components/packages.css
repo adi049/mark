@@ -1,0 +1,297 @@
+/* ==========================================================================
+   MARKIPIE · Packages
+   Tabbed groups (wedding, engagement, pre-wedding) with quiet card faces:
+ * title, context, price, enquiry. Full details expand behind a toggle.
+   ========================================================================== */
+
+/* Section anchor target from the services page. */
+.mp-packages {
+  scroll-margin-top: calc(var(--mp-navbar-height) + 1rem);
+}
+
+/* Tabs: flat underline tabs, not pills. */
+.mp-packages__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--mp-color-line);
+  margin-bottom: var(--mp-space-5);
+}
+
+.mp-tab {
+  position: relative;
+  padding: 0.7rem 1.05rem;
+  border: none;
+  background: none;
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-ink-soft);
+  cursor: pointer;
+  transition: color var(--mp-transition-fast);
+}
+
+.mp-tab::after {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: -1px;
+  height: 2px;
+  background: transparent;
+  transition: background-color var(--mp-transition-fast);
+}
+
+.mp-tab:hover {
+  color: var(--mp-color-ink);
+}
+
+.mp-tab.is-active {
+  color: var(--mp-color-ink);
+}
+
+.mp-tab.is-active::after {
+  background: var(--mp-color-blue-600);
+}
+
+.mp-tab:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: -2px;
+}
+
+.mp-tab__count {
+  margin-left: 0.4rem;
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-medium);
+  color: var(--mp-color-ink-muted);
+}
+
+/* Grid: two columns from small tablets up, stacked on phones. */
+.mp-packages__grid {
+  display: grid;
+  gap: var(--mp-space-4);
+}
+
+.mp-packages__item {
+  display: flex;
+  min-width: 0;
+}
+
+/* Card */
+.mp-package-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  background: var(--mp-color-surface);
+  border: 1px solid var(--mp-color-line);
+  border-top: 3px solid;
+  border-radius: var(--mp-radius-md);
+  padding: var(--mp-space-5);
+  box-shadow: var(--mp-shadow-sm);
+}
+
+.mp-package-card--blue {
+  border-top-color: var(--mp-color-blue-300);
+}
+
+.mp-package-card--green {
+  border-top-color: var(--mp-color-green-300);
+}
+
+.mp-package-card--pink {
+  border-top-color: var(--mp-color-pink-300);
+}
+
+.mp-package-card__tag {
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--mp-tracking-wide);
+  color: var(--mp-color-ink-muted);
+}
+
+.mp-package-card__title {
+  margin-top: 0.5rem;
+  font-size: 1.1875rem;
+  font-weight: var(--mp-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: var(--mp-leading-snug);
+}
+
+.mp-package-card__context {
+  margin-top: 0.35rem;
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+.mp-package-card__coverage {
+  margin-top: 0.3rem;
+  font-size: var(--mp-font-size-xs);
+  color: var(--mp-color-ink-muted);
+}
+
+/* Price */
+.mp-package-card__price {
+  margin-top: var(--mp-space-4);
+  padding-top: var(--mp-space-4);
+  border-top: 1px solid var(--mp-color-line);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+}
+
+.mp-package-card__amount {
+  font-family: var(--mp-font-display);
+  font-size: 1.9rem;
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-ink);
+  line-height: 1;
+}
+
+.mp-package-card__price-note {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+/* Details toggle */
+.mp-package-card__toggle {
+  margin-top: var(--mp-space-3);
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.6rem;
+  margin-left: -0.6rem;
+  border: none;
+  background: none;
+  font-family: var(--mp-font-body);
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-blue-700);
+  cursor: pointer;
+  border-radius: var(--mp-radius-sm);
+  transition: color var(--mp-transition-fast);
+}
+
+.mp-package-card__toggle:hover {
+  color: var(--mp-color-ink);
+}
+
+.mp-package-card__toggle:focus-visible {
+  outline: 2px solid var(--mp-color-blue-600);
+  outline-offset: 2px;
+}
+
+/* Expanded details */
+.mp-package-card__details {
+  overflow: hidden;
+}
+
+.mp-package-card__details-inner {
+  padding-top: var(--mp-space-4);
+  display: grid;
+  gap: var(--mp-space-4);
+}
+
+.mp-package-card__details-heading {
+  font-size: var(--mp-font-size-xs);
+  font-weight: var(--mp-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--mp-tracking-wide);
+  color: var(--mp-color-ink-muted);
+  margin-bottom: var(--mp-space-2);
+}
+
+/* Crew grouped by event */
+.mp-package-card__events {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.mp-package-card__event {
+  padding: 0.7rem 0.85rem;
+  background: var(--mp-color-surface-alt);
+  border-radius: var(--mp-radius-sm);
+}
+
+.mp-package-card__event-name {
+  font-size: var(--mp-font-size-sm);
+  font-weight: var(--mp-font-weight-semibold);
+  color: var(--mp-color-ink);
+  margin-bottom: 0.25rem;
+}
+
+.mp-package-card__event-crew {
+  list-style: none;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.mp-package-card__event-crew li {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+/* Flat crew list, when a package is not split by event */
+.mp-package-card__crew {
+  list-style: none;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.mp-package-card__crew li {
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+}
+
+/* Deliverables and complimentary lists */
+.mp-package-card__list {
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.mp-package-card__list li {
+  position: relative;
+  padding-left: 1rem;
+  font-size: var(--mp-font-size-sm);
+  color: var(--mp-color-ink-soft);
+  break-inside: avoid;
+}
+
+.mp-package-card__list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--mp-radius-full);
+  background: var(--mp-color-blue-300);
+}
+
+.mp-package-card__foot {
+  margin-top: auto;
+  padding-top: var(--mp-space-4);
+}
+
+/* ------------------------------------------------------------- Breakpoints */
+@media (min-width: 40em) {
+  .mp-package-card__events {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .mp-package-card__crew {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 48em) {
+  .mp-packages__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--mp-space-5);
+  }
+}
