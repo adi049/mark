@@ -33,6 +33,39 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
+      # GitHub Pages serves this repository below /mark/. Public assets in
+      # React are authored as /assets/... for normal hosting, so rewrite only
+      # the built output to the project-site prefix.
+      - name: Prefix public asset URLs for GitHub Pages
+        env:
+          VITE_BASE_PATH: /mark/
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          import path from 'node:path'
+
+          const base = (process.env.VITE_BASE_PATH || '/').replace(/\/+$/, '') + '/'
+          const files = []
+
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const full = path.join(dir, entry.name)
+              if (entry.isDirectory()) walk(full)
+              else if (/\.(html|js|css|mjs|json)$/i.test(entry.name)) files.push(full)
+            }
+          }
+
+          walk('dist')
+
+          for (const file of files) {
+            let text = fs.readFileSync(file, 'utf8')
+            text = text.replace(/([\"'\(])\/assets\//g, '$1' + base + 'assets/')
+            text = text.replace(/url\(\s*\/assets\//g, 'url(' + base + 'assets/')
+            text = text.replace(/([\"'\(])\/favicon(?=[.\"'])/g, '$1' + base + 'favicon')
+            fs.writeFileSync(file, text)
+          }
+          NODE
+
       # GitHub Pages needs a fallback document for BrowserRouter routes.
       - name: Add SPA fallback
         run: cp dist/index.html dist/404.html
