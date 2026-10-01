@@ -52,7 +52,7 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/mark">
       <ScrollToTop />
 
       {/*
