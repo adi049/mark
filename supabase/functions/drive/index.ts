@@ -832,7 +832,10 @@ Deno.serve(async (request) => {
   }
 
   const url = new URL(request.url)
-  const path = url.pathname.replace(/^\/functions\/v1\/drive\/?/, '')
+  const path = url.pathname
+    .replace(/^\/functions\/v1\/drive\/?/, '')
+    .replace(/^\/drive\/?/, '')
+    .replace(/^\/?/, '')
   baseForRedirects = `${url.origin}/functions/v1/drive`
 
   try {
