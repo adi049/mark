@@ -12,7 +12,7 @@
  */
 
 /** Face library directory, served from public/models. */
-export const FACE_MODEL_URL = '/models'
+export const FACE_MODEL_URL = `${import.meta.env.BASE_URL || '/'}models`
 
 /**
  * Euclidean distance below which two descriptors count as the same face.
