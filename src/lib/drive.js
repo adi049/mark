@@ -15,8 +15,10 @@ function driveBase() {
   if (override) {
     return trim(override)
   }
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-  return supabaseUrl ? `${trim(supabaseUrl)}/functions/v1/drive` : null
+  const supabaseUrl =
+    import.meta.env.VITE_SUPABASE_URL ||
+    'https://ftnmeccyphwsyleqgmkd.supabase.co'
+  return `${trim(supabaseUrl)}/functions/v1/drive`
 }
 
 /** True when a Drive backend is reachable (Supabase configured or override). */
