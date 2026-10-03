@@ -1,0 +1,6 @@
+# MARKIPIE Supabase Edge Function configuration
+# The Drive function performs its own admin JWT validation and also exposes
+# browser OAuth callback/media routes, so the platform-level legacy JWT gate
+# must be disabled for this function.
+[functions.drive]
+verify_jwt = false
