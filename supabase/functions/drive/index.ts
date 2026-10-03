@@ -80,9 +80,28 @@ function corsPreflight(request) {
 
 // ---------------------------------------------------------------- Supabase --
 function adminClient() {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+  
+  // Supabase now provisions the newer named secret-key map in hosted
+  // Edge Functions. Keep the legacy service-role variable as a fallback
+  // for existing projects.
+  let secretKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  if (!secretKey) {
+    try {
+      const secretKeys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}')
+      secretKey = secretKeys.default ?? ''
+    } catch {
+      secretKey = ''
+    }
+  }
+
+  if (!supabaseUrl || !secretKey) {
+    throw new Error('Supabase server key is not available in the Edge Function runtime.')
+  }
+
   return createClient(
-    env('SUPABASE_URL') ?? Deno.env.get('SUPABASE_URL')!,
-    env('SUPABASE_SERVICE_ROLE_KEY'),
+    supabaseUrl,
+    secretKey,
     { auth: { persistSession: false } }
   )
 }
