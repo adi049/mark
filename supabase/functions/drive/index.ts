@@ -788,16 +788,40 @@ async function serveMedia(request, mediaId) {
     }
   }
 
+  // Forward browser byte-range requests so HTML5 video can seek and play
+  // progressively through the Edge Function instead of downloading the entire file.
+  const requestedRange = request.headers.get('range')
+  const driveHeaders = { Authorization: `Bearer ${token}` }
+  if (requestedRange) {
+    driveHeaders.Range = requestedRange
+  }
+
   const fileResponse = await fetch(
     `https://www.googleapis.com/drive/v3/files/${media.external_file_id}?alt=media`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: driveHeaders }
   )
-  if (!fileResponse.ok) {
+  if (!fileResponse.ok && fileResponse.status !== 206) {
     return jsonResponse({ message: 'This media could not be loaded right now.' }, 502)
   }
+
+  const responseHeaders = {
+    ...headers,
+    'Content-Type':
+      media.mime_type ??
+      fileResponse.headers.get('content-type') ??
+      'application/octet-stream',
+    'Accept-Ranges': 'bytes',
+  }
+  for (const name of ['content-length', 'content-range']) {
+    const value = fileResponse.headers.get(name)
+    if (value) {
+      responseHeaders[name] = value
+    }
+  }
+
   return new Response(fileResponse.body, {
-    status: 200,
-    headers: { ...headers, 'Content-Type': media.mime_type ?? 'application/octet-stream' },
+    status: fileResponse.status,
+    headers: responseHeaders,
   })
 }
 
