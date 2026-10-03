@@ -242,4 +242,28 @@ export const PACKAGE_GROUPS = [
       },
     ],
   },
+  {
+    id: 'birthday',
+    label: 'Birthday',
+    packages: [
+      {
+        id: 'birthday-photography-100',
+        number: '09',
+        title: 'Birthday Photography',
+        context: 'Up to 100 Gathering',
+        events: null,
+        crew: ['1 Cinematographer', '1 Candid'],
+        deliverables: [
+          'Unlimited Raw Photos',
+          'Teaser Cinematic Video',
+          'Short Video or Reel',
+          'Long Edited Video',
+        ],
+        complimentary: ['16X24 Frame'],
+        price: '₹15,000',
+        priceNote: 'With Album: ₹18,000',
+        accent: 'pink',
+      },
+    ],
+  },
 ]
