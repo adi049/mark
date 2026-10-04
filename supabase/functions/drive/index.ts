@@ -188,7 +188,7 @@ async function beginOauthState(request, returnTo) {
   await db.from('drive_oauth_states').delete().lt('expires_at', new Date().toISOString())
   const { error } = await db.from('drive_oauth_states').insert({
     state_hash: await sha256Base64(state),
-    admin_user_id: admin.user.id,
+    admin_user_id: admin.id,
     site_origin: siteOrigin,
     return_to: returnTo,
     expires_at: expiresAt,
