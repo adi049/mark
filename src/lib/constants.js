@@ -12,21 +12,13 @@ export const SITE = {
   tagline: 'Photography, cinematography and creative studio',
   description:
     'Markipie is a premium photography, cinematography, wedding, event and creative digital services studio with an in-house color lab, editing suite and print setup.',
-  // Set to the production domain when it is final, for example 'https://markipie.com'.
   url: '',
   themeColor: '#FAFAF8',
   locale: 'en_IN',
-  // Official logo, served from public/assets/brand.
   logoUrl: '/assets/brand/logo-transparent.png',
-  // Text fallback if the logo image is ever unavailable.
   wordmark: 'MARKIPIE',
 }
 
-/**
- * Official contact channels. Only confirmed details belong here.
- * Email is intentionally empty: set it once available and the footer and
- * contact page pick it up automatically. Do not invent an address.
- */
 export const CONTACT = {
   phone: '8586000345',
   telUrl: 'tel:8586000345',
@@ -36,7 +28,6 @@ export const CONTACT = {
   email: '',
 }
 
-/** Every route in the application. */
 export const ROUTES = {
   HOME: { path: '/', label: 'Home' },
   ABOUT: { path: '/about', label: 'About' },
@@ -51,7 +42,6 @@ export const ROUTES = {
   ADMIN: { path: '/admin', label: 'Admin' },
 }
 
-/** Primary navigation, in display order. Admin stays hidden from the navbar. */
 export const NAV_LINKS = [
   ROUTES.HOME,
   ROUTES.ABOUT,
@@ -63,7 +53,6 @@ export const NAV_LINKS = [
   ROUTES.CONTACT,
 ]
 
-/** Footer link columns. Service entries deep link to the services grid. */
 export const FOOTER_COLUMNS = [
   {
     title: 'Explore',
@@ -92,10 +81,6 @@ export const FOOTER_COLUMNS = [
   },
 ]
 
-/**
- * Breakpoint reference for any JavaScript that needs it. Mirrors the values
- * documented in src/styles/variables.css.
- */
 export const BREAKPOINTS = {
   sm: 640,
   md: 768,
@@ -104,7 +89,6 @@ export const BREAKPOINTS = {
   '2xl': 1536,
 }
 
-/** Event types used across the studio system. */
 export const EVENT_TYPES = [
   'Wedding',
   'Engagement',
@@ -112,11 +96,11 @@ export const EVENT_TYPES = [
   'Mehendi',
   'Reception',
   'Pre-Wedding',
+  'Birthday',
   'Event',
   'Other',
 ]
 
-/** Statuses shared by clients and events. */
 export const RECORD_STATUSES = [
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
