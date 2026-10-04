@@ -43,6 +43,7 @@ const PERMISSION_ROWS = [
 export function EventPermissionsPanel({ event, onChanged }) {
   const { user } = useAdminAuth()
   const [payment, setPayment] = useState(event?.payment_status ?? 'unpaid')
+  const [initialPayment, setInitialPayment] = useState(event?.initial_payment_status ?? 'unpaid')
   const [paymentMeta, setPaymentMeta] = useState({
     at: event?.payment_updated_at ?? null,
     by: event?.payment_updated_by ?? null,
@@ -58,12 +59,12 @@ export function EventPermissionsPanel({ event, onChanged }) {
     at: event?.permissions_updated_at ?? null,
     by: event?.permissions_updated_by ?? null,
   })
-  const [busy, setBusy] = useState(null) // 'payment' | flag key
+  const [busy, setBusy] = useState(null)
   const [error, setError] = useState(null)
 
-  // Keep the panel in sync when the parent refetches the event.
   useEffect(() => {
     setPayment(event?.payment_status ?? 'unpaid')
+    setInitialPayment(event?.initial_payment_status ?? 'unpaid')
     setPaymentMeta({ at: event?.payment_updated_at ?? null, by: event?.payment_updated_by ?? null })
     setPermissionsMeta({
       at: event?.permissions_updated_at ?? null,
@@ -79,23 +80,29 @@ export function EventPermissionsPanel({ event, onChanged }) {
   }, [event])
 
   const changePayment = async (status) => {
-    if (busy || status === payment) {
-      return
-    }
+    if (busy || status === payment) return
     setBusy('payment')
     setError(null)
     const previous = { payment, meta: paymentMeta }
     setPayment(status)
     try {
-      const { data, error: rpcError } = await supabase.rpc('admin_set_payment_status', {
-        p_event_id: event.id,
-        p_status: status,
-      })
-      if (rpcError) {
-        throw rpcError
-      }
-      const record = data && typeof data === 'object' && !Array.isArray(data) ? data : {}
-      setPaymentMeta({ at: record.payment_updated_at ?? null, by: record.payment_updated_by ?? null })
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({
+          payment_status: status,
+          payment_updated_at: new Date().toISOString(),
+          payment_updated_by: user?.email ?? 'admin',
+        })
+        .eq('id', event.id)
+      if (updateError) throw updateError
+      const { data: saved, error: verifyError } = await supabase
+        .from('events')
+        .select('payment_status,payment_updated_at,payment_updated_by')
+        .eq('id', event.id)
+        .single()
+      if (verifyError) throw verifyError
+      setPayment(saved.payment_status ?? status)
+      setPaymentMeta({ at: saved.payment_updated_at ?? null, by: saved.payment_updated_by ?? null })
       onChanged?.()
     } catch (updateError) {
       setPayment(previous.payment)
@@ -106,27 +113,62 @@ export function EventPermissionsPanel({ event, onChanged }) {
     }
   }
 
-  const changeFlag = async (key, value) => {
-    if (busy) {
-      return
+  const changeInitialPayment = async (status) => {
+    if (busy || status === initialPayment) return
+    setBusy('initial_payment')
+    setError(null)
+    const previous = initialPayment
+    setInitialPayment(status)
+    try {
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ initial_payment_status: status })
+        .eq('id', event.id)
+      if (updateError) throw updateError
+      const { data: saved, error: verifyError } = await supabase
+        .from('events')
+        .select('initial_payment_status')
+        .eq('id', event.id)
+        .single()
+      if (verifyError) throw verifyError
+      setInitialPayment(saved.initial_payment_status ?? status)
+      onChanged?.()
+    } catch (updateError) {
+      setInitialPayment(previous)
+      setError(friendlyDbError(updateError))
+    } finally {
+      setBusy(null)
     }
+  }
+
+  const changeFlag = async (key, value) => {
+    if (busy) return
     setBusy(key)
     setError(null)
     const previous = flags[key]
     setFlags((current) => ({ ...current, [key]: value }))
     try {
+      const updatedAt = new Date().toISOString()
       const { error: updateError } = await supabase
         .from('events')
         .update({
           [key]: value,
-          permissions_updated_at: new Date().toISOString(),
+          permissions_updated_at: updatedAt,
           permissions_updated_by: user?.email ?? 'admin',
         })
         .eq('id', event.id)
-      if (updateError) {
-        throw updateError
-      }
-      setPermissionsMeta({ at: new Date().toISOString(), by: user?.email ?? 'admin' })
+      if (updateError) throw updateError
+      const { data: saved, error: verifyError } = await supabase
+        .from('events')
+        .select(`${key},permissions_updated_at,permissions_updated_by`)
+        .eq('id', event.id)
+        .single()
+      if (verifyError) throw verifyError
+      setFlags((current) => ({ ...current, [key]: Boolean(saved[key]) }))
+      setPermissionsMeta({
+        at: saved.permissions_updated_at ?? updatedAt,
+        by: saved.permissions_updated_by ?? user?.email ?? 'admin',
+      })
       onChanged?.()
     } catch (updateError) {
       setFlags((current) => ({ ...current, [key]: previous }))
@@ -149,11 +191,14 @@ export function EventPermissionsPanel({ event, onChanged }) {
         ) : null}
       </div>
 
-      {/* Summary reflecting the actual stored values */}
       <div className="mp-adm-perm__summary">
         <div className="mp-adm-perm__cell">
           <span className="mp-adm-perm__cell-label">Payment</span>
           <span className={`mp-adm-perm__pay mp-adm-perm__pay--${payment}`}>{paymentLabel(payment)}</span>
+        </div>
+        <div className="mp-adm-perm__cell">
+          <span className="mp-adm-perm__cell-label">Initial payment</span>
+          <span className={`mp-adm-perm__pay mp-adm-perm__pay--${initialPayment}`}>{initialPayment === 'paid' ? 'PAID' : 'UNPAID'}</span>
         </div>
         <div className="mp-adm-perm__cell">
           <span className="mp-adm-perm__cell-label">Watermark</span>
@@ -177,7 +222,6 @@ export function EventPermissionsPanel({ event, onChanged }) {
         </div>
       </div>
 
-      {/* Payment status control */}
       <div className="mp-adm-perm__block">
         <p className="mp-adm-perm__block-title">
           <CreditCard size={14} aria-hidden="true" /> Payment status
@@ -204,6 +248,23 @@ export function EventPermissionsPanel({ event, onChanged }) {
             </button>
           ))}
         </div>
+
+        <p className="mp-adm-perm__block-title mp-adm-perm__subcontrol-title">Initial payment</p>
+        <div className="mp-adm-perm__pay-buttons" role="group" aria-label="Initial payment status">
+          {['unpaid', 'paid'].map((status) => (
+            <button
+              key={`initial-${status}`}
+              type="button"
+              className={`mp-adm-perm__pay-btn${initialPayment === status ? ' is-active' : ''}`}
+              aria-pressed={initialPayment === status}
+              disabled={busy === 'initial_payment'}
+              onClick={() => changeInitialPayment(status)}
+            >
+              {initialPayment === status ? <CheckCircle2 size={13} aria-hidden="true" /> : null}
+              {status === 'paid' ? 'PAID' : 'UNPAID'}
+            </button>
+          ))}
+        </div>
         <dl className="mp-adm-perm__meta">
           <div>
             <dt>Last updated</dt>
@@ -216,7 +277,6 @@ export function EventPermissionsPanel({ event, onChanged }) {
         </dl>
       </div>
 
-      {/* Permission switches */}
       <div className="mp-adm-perm__block">
         <p className="mp-adm-perm__block-title">Event permissions</p>
         {PERMISSION_ROWS.map((row) => (
