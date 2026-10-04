@@ -24,7 +24,11 @@
   color: var(--mp-color-ink);
 }
 
-/* Slightly larger lockup for the footer. */
 .mp-brand--footer .mp-brand__logo {
   height: 30px;
+}
+
+.mp-brand__logo, .mp-adm-side__logo, .mp-adm-login__brand img {
+  object-fit: contain;
+  object-position: left center;
 }
