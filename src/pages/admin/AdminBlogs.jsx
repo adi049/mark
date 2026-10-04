@@ -9,6 +9,7 @@ import {
   AdminNotConfigured,
 } from '@/components/admin/StatePanels'
 import { Button } from '@/components/ui/Button'
+import { Link } from 'react-router-dom'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { supabase } from '@/lib/supabase'
 import { friendlyDbError } from '@/lib/dbErrors'
@@ -123,7 +124,7 @@ export default function AdminBlogs() {
             ...base,
             published_at: base.published
               ? previous.published_at || new Date().toISOString()
-              : previous.published_at || null,
+              : null,
           })
           .eq('id', previous.id)
         if (updateError) {
@@ -146,7 +147,7 @@ export default function AdminBlogs() {
         .from('blogs')
         .update({
           published: !post.published,
-          published_at: !post.published ? post.published_at || new Date().toISOString() : post.published_at || null,
+          published_at: !post.published ? post.published_at || new Date().toISOString() : null,
         })
         .eq('id', post.id)
       if (error) {
@@ -256,15 +257,15 @@ export default function AdminBlogs() {
                     </td>
                     <td data-label="Actions" className="mp-adm-table__actions">
                       {post.published ? (
-                        <a
+                        <Link
                           className="mp-adm-iconbtn"
-                          href={`/blogs/${post.slug}`}
+                          to={`/blogs/${post.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`View ${post.title} on the website`}
                         >
                           <ExternalLink size={15} aria-hidden="true" />
-                        </a>
+                        </Link>
                       ) : null}
                       <button
                         type="button"
