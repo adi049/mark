@@ -855,7 +855,7 @@ Deno.serve(async (request) => {
     .replace(/^\/functions\/v1\/drive\/?/, '')
     .replace(/^\/drive\/?/, '')
     .replace(/^\/?/, '')
-  baseForRedirects = `${url.origin}/functions/v1/drive`
+  baseForRedirects = `https://${url.host}/functions/v1/drive`
 
   try {
     // ---- OAuth begin (admin authenticated; returns the consent URL) ----
