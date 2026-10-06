@@ -373,6 +373,8 @@ async function listChildren(db, folderId, pageToken) {
     fields:
       'nextPageToken, files(id, name, mimeType, fileExtension, size, modifiedTime, thumbnailLink, lastModifiedByMeTime)',
     pageSize: '200',
+    supportsAllDrives: 'true',
+    includeItemsFromAllDrives: 'true',
   })
   if (pageToken) {
     params.set('pageToken', pageToken)
