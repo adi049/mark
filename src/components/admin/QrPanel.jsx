@@ -14,7 +14,10 @@ export function QrPanel({ event, onTokenChange }) {
   const [dataUrl, setDataUrl] = useState(null)
   const [renderError, setRenderError] = useState(null)
 
-  const accessUrl = token ? `${window.location.origin}/client-access?event=${token}` : null
+  const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+  const accessUrl = token
+    ? `${window.location.origin}${basePath}/client-access?event=${encodeURIComponent(token)}`
+    : null
 
   useEffect(() => {
     if (!accessUrl) {
