@@ -28,18 +28,34 @@ export default function ClientAccess() {
   const location = useLocation()
   const navigate = useNavigate()
   const [session, setSession] = useState(null)
-  const [gate, setGate] = useState(null) // { code, event } awaiting the Instagram step
+  const [gate, setGate] = useState(null)
   const gateRef = useRef(null)
   const [eventCode, setEventCode] = useState('')
-  const [status, setStatus] = useState('idle') // idle | checking | invalid | error
+  const [status, setStatus] = useState('idle')
   const [message, setMessage] = useState(null)
   const [scanOpen, setScanOpen] = useState(false)
 
-  // A stored access session is restored on mount. When its Instagram step
-  // was not completed yet, the gate shows again instead of the gallery, so
-  // the step cannot be skipped by reloading mid-countdown.
+  // A QR link is authoritative for the event it contains. If this tab
+  // already has another client session, replace it instead of silently
+  // reopening the old gallery.
   useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get('event')
     const stored = getClientSession()
+
+    if (token && token.trim()) {
+      const incoming = token.trim()
+      const sameSession = stored?.code?.trim() === incoming
+      if (!sameSession) {
+        clearClientSession()
+        setSession(null)
+        setGate(null)
+        gateRef.current = null
+        setEventCode(incoming)
+        lookup(incoming)
+        return
+      }
+    }
+
     if (stored) {
       if (stored.event?.instagram_gate_enabled !== false && !stored.gateAt) {
         gateRef.current = stored
@@ -49,25 +65,18 @@ export default function ClientAccess() {
       }
       return
     }
-    // QR links arrive as /client-access?event=TOKEN and resolve automatically.
-    const token = new URLSearchParams(window.location.search).get('event')
+
     if (token) {
       setEventCode(token)
       lookup(token)
     }
-    // Runs once on mount: the stored session or QR token is read once.
+    // Runs once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // A face scan finished (on the Home page or here) and produced an event
-  // session plus a captured descriptor: open the gallery straight into the
-  // matched photos, then drop the descriptor from the address state.
   const [faceDescriptor, setFaceDescriptor] = useState(null)
   useEffect(() => {
     if (location.state?.faceDescriptor) {
-      // When the scan started on this page the session was persisted by
-      // the flow itself; this page is already mounted, so its session state
-      // has to be re-read instead of waiting for a remount.
       const stored = getClientSession()
       if (stored) {
         setSession(stored)
@@ -108,16 +117,12 @@ export default function ClientAccess() {
       return
     }
 
-    // The RPC returns a row or a one-element array depending on the client.
     const record = Array.isArray(data) ? data[0] : data
     if (!record) {
       setStatus('invalid')
       return
     }
 
-    // Valid: open the client session. When the Instagram gate is enabled
-    // for this event, the gallery only opens after that step; the session
-    // is stored first so returning from Instagram never loses the gallery.
     const gateRequired = record.instagram_gate_enabled !== false
     setClientSession(code, record, { gateCompleted: !gateRequired })
     setStatus('idle')
@@ -130,8 +135,6 @@ export default function ClientAccess() {
     }
   }
 
-  // The gate countdown finished: persist the completed step right away so
-  // a visitor who leaves for Instagram and returns never repeats it.
   const handleGateCountdownEnd = () => {
     const stored = completeClientGate()
     if (stored) {
