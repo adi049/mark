@@ -67,6 +67,15 @@ jobs:
           NODE
 
       # GitHub Pages needs a fallback document for BrowserRouter routes.
+      - name: Verify face-scan model assets
+        run: |
+          test -f dist/models/tiny_face_detector_model-weights_manifest.json
+          test -f dist/models/tiny_face_detector_model.bin
+          test -f dist/models/face_landmark_68_model-weights_manifest.json
+          test -f dist/models/face_landmark_68_model.bin
+          test -f dist/models/face_recognition_model-weights_manifest.json
+          test -f dist/models/face_recognition_model.bin
+
       - name: Add SPA fallback
         run: cp dist/index.html dist/404.html
 
