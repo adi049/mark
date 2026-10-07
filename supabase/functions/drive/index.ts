@@ -321,7 +321,19 @@ async function driveFetch(db, path, options = {}) {
     throw new HttpError(403, 'Google did not allow access to that folder. Reconnect Drive or check the folder sharing.')
   }
   if (!response.ok) {
-    throw new HttpError(502, 'Google Drive could not complete the request.')
+    let detail = ''
+    try {
+      const payload = await response.clone().json()
+      detail = payload?.error?.message ?? payload?.error_description ?? ''
+    } catch {
+      try {
+        detail = (await response.clone().text()).slice(0, 300)
+      } catch {
+        detail = ''
+      }
+    }
+    const suffix = detail ? ` (${detail})` : ''
+    throw new HttpError(502, `Google Drive request failed with HTTP ${response.status}${suffix}.`)
   }
   return response
 }
@@ -443,7 +455,7 @@ async function runImport(db, jobId, eventId, urlOrId, userId) {
 
     // Walk Drive with correct parent tracking.
     const token = await googleToken(db)
-    const rootResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,mimeType`, {
+    const rootResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,mimeType&supportsAllDrives=true`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!rootResponse.ok) {
@@ -613,7 +625,7 @@ async function runSync(db, jobId, eventId) {
 async function syncWalk(db, jobId, eventId, rootId) {
   await setPhase(db, jobId, 'connecting')
   const token = await googleToken(db)
-  const rootResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${rootId}?fields=id,name`, {
+  const rootResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${rootId}?fields=id,name&supportsAllDrives=true`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!rootResponse.ok) {
