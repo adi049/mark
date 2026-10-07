@@ -14,7 +14,12 @@ export function QrPanel({ event, onTokenChange }) {
   const [dataUrl, setDataUrl] = useState(null)
   const [renderError, setRenderError] = useState(null)
 
-  const basePath = (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+  // GitHub Pages hosts this project under /mark/. Keep QR links correct even
+  // when the admin UI is running from a stale/incorrect BASE_URL build.
+  const basePath = window.location.hostname.endsWith('github.io')
+    ? '/mark'
+    : (import.meta.env.BASE_URL || '/').replace(/\/$/, '')
+
   const accessUrl = token
     ? `${window.location.origin}${basePath}/client-access?event=${encodeURIComponent(token)}`
     : null
