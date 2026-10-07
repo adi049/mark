@@ -42,10 +42,10 @@ begin
      where r.media_id = m.id and r.session_id = p_session_id limit 1),
     d.dist::float
   from (
-    select fe.media_id, min(fe.embedding <-> (p_embedding)::extensions.vector) as dist
+    select fe.media_id, min(fe.embedding operator(extensions.<->) (p_embedding)::extensions.vector) as dist
     from public.face_embeddings fe
     where fe.event_id = v_event.id
-      and (fe.embedding <-> (p_embedding)::extensions.vector) < p_threshold
+      and (fe.embedding operator(extensions.<->) (p_embedding)::extensions.vector) < p_threshold
     group by fe.media_id
   ) d
   join public.media m on m.id = d.media_id
