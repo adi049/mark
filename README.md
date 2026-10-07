@@ -4,6 +4,8 @@ The Markipie website and studio platform: a premium, editorial, light identity
 for a photography, cinematography, wedding, event and creative digital
 services studio, with a complete client gallery delivery system behind it.
 
+**Production note:** admin gallery/client-access routing, shared-drive media streaming, face-scan/admin RPC security, album selection and reaction-summary repairs are included in the current production branch.
+
 **Status:** all core development phases complete. The public website, admin
 panel, Supabase data layer, Google Drive import, event codes with QR access,
 AI face scan, Instagram gate with countdown, watermark and download
