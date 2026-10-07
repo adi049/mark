@@ -371,7 +371,7 @@ async function listChildren(db, folderId, pageToken) {
   const params = new URLSearchParams({
     q: `'${folderId}' in parents and trashed = false`,
     fields:
-      'nextPageToken, files(id, name, mimeType, fileExtension, size, modifiedTime, thumbnailLink, lastModifiedByMeTime)',
+      'nextPageToken, files(id, name, mimeType, fileExtension, size, modifiedTime, thumbnailLink)',
     pageSize: '200',
     supportsAllDrives: 'true',
     includeItemsFromAllDrives: 'true',
