@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/Button'
 import { useSupabaseQuery } from '@/hooks/useSupabaseQuery'
 import { EVENT_TYPES, RECORD_STATUSES } from '@/lib/constants'
 import { supabase } from '@/lib/supabase'
-import { generateUniqueCode } from '@/lib/accessCodes'
+import { generateEventToken, generateUniqueCode } from '@/lib/accessCodes'
 import { friendlyDbError } from '@/lib/dbErrors'
 import { formatDate, statusLabel } from '@/lib/format'
 
@@ -167,6 +167,9 @@ export default function AdminEvents() {
           }
           payload.access_code = code
         }
+        // Every new event gets a QR token immediately, so the QR panel is
+        // usable as soon as the event is created without a second setup step.
+        payload.qr_token = generateEventToken()
         const { error: insertError } = await supabase.from('events').insert(payload)
         if (insertError) {
           throw insertError
