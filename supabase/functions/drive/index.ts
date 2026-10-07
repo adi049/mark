@@ -766,13 +766,22 @@ async function serveMedia(request, mediaId) {
   }
 
   const db = adminClient()
-  const { data: event } = await db
+  const normalizedCode = code.trim().toUpperCase()
+  let { data: event } = await db
     .from('events')
     .select('id, status, access_code, qr_token, download_enabled')
     .eq('status', 'active')
-    .or(`access_code.ilike.${code},qr_token.eq.${code}`)
-    .limit(1)
+    .eq('access_code', normalizedCode)
     .maybeSingle()
+  if (!event) {
+    const qrLookup = await db
+      .from('events')
+      .select('id, status, access_code, qr_token, download_enabled')
+      .eq('status', 'active')
+      .eq('qr_token', code.trim())
+      .maybeSingle()
+    event = qrLookup.data ?? null
+  }
   if (!event) {
     return jsonResponse({ message: 'This gallery link is no longer valid.' }, 401)
   }
@@ -967,7 +976,7 @@ Deno.serve(async (request) => {
       // Edge functions should return quickly; the walk continues in this
       // invocation's lifetime. For very large folders, split the walk into
       // repeated /sync calls (each pass picks up where the tree left off).
-      runImport(db, jobId, body.eventId, body.urlOrId, user.id)
+      EdgeRuntime.waitUntil(runImport(db, jobId, body.eventId, body.urlOrId, user.id))
       return jsonResponse({ jobId }, 202)
     }
 
@@ -978,7 +987,7 @@ Deno.serve(async (request) => {
         throw new HttpError(400, 'Choose the event to sync first.')
       }
       const jobId = await createJob(db, 'sync', body.eventId, user.id)
-      runSync(db, jobId, body.eventId)
+      EdgeRuntime.waitUntil(runSync(db, jobId, body.eventId))
       return jsonResponse({ jobId }, 202)
     }
 
