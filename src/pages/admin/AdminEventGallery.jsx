@@ -79,7 +79,7 @@ export default function AdminEventGallery() {
         {data ? (
           <a
             className="mp-adm-btn mp-adm-btn--secondary"
-            href={`/client-access?event=${data.event.qr_token ?? data.event.access_code}`}
+            href={`${window.location.origin}${(import.meta.env.BASE_URL || '/').replace(/\/$/, '')}/client-access?event=${encodeURIComponent(data.event.qr_token ?? data.event.access_code ?? '')}`}
             target="_blank"
             rel="noopener noreferrer"
           >
