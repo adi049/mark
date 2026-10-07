@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Briefcase,
   CalendarDays,
@@ -68,9 +68,9 @@ function SidebarContent({ onNavigate, onLogout }) {
 
       <div className="mp-adm-side__foot">
         {user?.email ? <p className="mp-adm-side__user">{user.email}</p> : null}
-        <a className="mp-adm-side__public" href={ROUTES.HOME.path}>
+        <Link className="mp-adm-side__public" to={ROUTES.HOME.path}>
           View public website
-        </a>
+        </Link>
         <button type="button" className="mp-adm-side__logout" onClick={onLogout}>
           <LogOut size={16} aria-hidden="true" />
           Logout
