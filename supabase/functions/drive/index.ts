@@ -792,7 +792,7 @@ async function serveMedia(request, mediaId) {
   // original. Both stay behind this endpoint so no Drive URL is exposed.
   if (variant === 'thumb' && media.file_type === 'image') {
     const metaResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${media.external_file_id}?fields=thumbnailLink`,
+      `https://www.googleapis.com/drive/v3/files/${media.external_file_id}?fields=thumbnailLink&supportsAllDrives=true`,
       { headers: { Authorization: `Bearer ${token}` } }
     )
     if (metaResponse.ok) {
@@ -818,7 +818,7 @@ async function serveMedia(request, mediaId) {
   }
 
   const fileResponse = await fetch(
-    `https://www.googleapis.com/drive/v3/files/${media.external_file_id}?alt=media`,
+    `https://www.googleapis.com/drive/v3/files/${media.external_file_id}?alt=media&supportsAllDrives=true`,
     { headers: driveHeaders }
   )
   if (!fileResponse.ok && fileResponse.status !== 206) {
