@@ -940,7 +940,7 @@ Deno.serve(async (request) => {
       const folderId = parseFolderInput(body?.urlOrId)
       const token = await googleToken(db)
       const metaResponse = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,mimeType`,
+        `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,mimeType&supportsAllDrives=true`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       if (!metaResponse.ok) {
