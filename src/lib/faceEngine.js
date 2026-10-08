@@ -33,6 +33,12 @@ export function loadFaceEngine() {
   if (!enginePromise) {
     enginePromise = (async () => {
       const faceapi = await import('@vladmandic/face-api')
+      try {
+        await faceapi.tf.setBackend('webgl')
+      } catch {
+        // Fall back to the library's available backend when WebGL is unavailable.
+      }
+      await faceapi.tf.ready()
       await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL)
       await faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL)
       await faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
