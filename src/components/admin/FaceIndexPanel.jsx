@@ -7,6 +7,7 @@ import { formatDate } from '@/lib/format'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 const SAVE_BATCH = 8
+const SCAN_CONCURRENCY = 2
 const INDEX_PHASES = [
   { key: 'preparing', label: 'Preparing' },
   { key: 'scanning', label: 'Scanning images' },
@@ -107,36 +108,77 @@ export function FaceIndexPanel({ event, refreshKey }) {
         }
       }
 
-      for (const item of queue) {
-        if (!aliveRef.current) {
-          return
-        }
+      // Do not scan the original Drive files one-by-one. The full originals
+      // can be huge, and sequential face detection makes large galleries
+      // painfully slow. Drive provides a protected 640px thumbnail that is
+      // enough for the detector and is much cheaper to download/decode.
+      const processItem = async (item) => {
         try {
-          const image = await loadImage(mediaSrc(item.media_id, event.access_code, 'full'))
-          const found = await detectFaces(image)
+          const image = await loadImage(mediaSrc(item.media_id, event.access_code, 'thumb'))
+          const found = await detectFaces(image, {
+            inputSize: 320,
+            scoreThreshold: 0.5,
+          })
           if (found.length > 0) {
-            batch.push(
-              ...found.map((face, index) => ({
+            return {
+              rows: found.map((face, index) => ({
                 media_id: item.media_id,
                 face_index: index,
                 embedding: Array.from(face.descriptor).map((value) => Number(value.toFixed(6))),
-              }))
-            )
-            faces += found.length
-          } else {
-            // No face in this photo: still mark it as processed so
-            // incremental reindexing can skip it.
-            batch.push({ media_id: item.media_id, face_index: 0, embedding: null })
+              })),
+              faces: found.length,
+              skipped: 0,
+            }
+          }
+
+          // No face in this photo: still mark it as processed so
+          // incremental reindexing can skip it.
+          return {
+            rows: [{ media_id: item.media_id, face_index: 0, embedding: null }],
+            faces: 0,
+            skipped: 0,
           }
         } catch {
-          skipped += 1
+          return { rows: [], faces: 0, skipped: 1 }
         }
-        scanned += 1
+      }
+
+      // A small amount of concurrency keeps the browser and network busy
+      // without trying to run hundreds of face detectors simultaneously.
+      for (let offset = 0; offset < queue.length; offset += SCAN_CONCURRENCY) {
+        if (!aliveRef.current) {
+          return
+        }
+
+        const chunk = queue.slice(offset, offset + SCAN_CONCURRENCY)
+        setRun({
+          phase: 'scanning',
+          scanned,
+          total: queue.length,
+          faces,
+          skipped,
+        })
+
+        const results = await Promise.all(chunk.map(processItem))
+        for (const result of results) {
+          batch.push(...result.rows)
+          faces += result.faces
+          skipped += result.skipped
+          scanned += 1
+        }
+
         if (batch.length >= SAVE_BATCH) {
           setRun((current) => ({ ...current, phase: 'saving' }))
           await saveBatch()
         }
-        setRun({ phase: 'scanning', scanned, total: queue.length, faces, skipped })
+
+        setRun({
+          phase: 'scanning',
+          scanned,
+          total: queue.length,
+          faces,
+          skipped,
+        })
       }
 
       setRun((current) => ({ ...current, phase: 'saving' }))
