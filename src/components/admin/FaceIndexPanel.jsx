@@ -6,8 +6,8 @@ import { mediaSrc } from '@/lib/drive'
 import { formatDate } from '@/lib/format'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
-const SAVE_BATCH = 8
-const SCAN_CONCURRENCY = 2
+const SAVE_BATCH = 16
+const SCAN_CONCURRENCY = 4
 const INDEX_PHASES = [
   { key: 'preparing', label: 'Preparing' },
   { key: 'scanning', label: 'Scanning images' },
@@ -116,7 +116,7 @@ export function FaceIndexPanel({ event, refreshKey }) {
         try {
           const image = await loadImage(mediaSrc(item.media_id, event.access_code, 'thumb'))
           const found = await detectFaces(image, {
-            inputSize: 320,
+            inputSize: 224,
             scoreThreshold: 0.5,
           })
           if (found.length > 0) {
