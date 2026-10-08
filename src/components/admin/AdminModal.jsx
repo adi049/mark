@@ -11,6 +11,11 @@ const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), selec
 export function AdminModal({ title, onClose, children, wide = false }) {
   const panelRef = useRef(null)
   const closeRef = useRef(null)
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
@@ -21,7 +26,7 @@ export function AdminModal({ title, onClose, children, wide = false }) {
     const handleKey = (event) => {
       if (event.key === 'Escape') {
         event.stopPropagation()
-        onClose()
+        onCloseRef.current?.()
         return
       }
       if (event.key === 'Tab' && panelRef.current) {
@@ -49,7 +54,7 @@ export function AdminModal({ title, onClose, children, wide = false }) {
         previousFocus.focus()
       }
     }
-  }, [onClose])
+  }, [])
 
   return (
     <motion.div
