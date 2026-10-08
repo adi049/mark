@@ -47,11 +47,14 @@ export function loadFaceEngine() {
  * @param {HTMLImageElement|HTMLVideoElement|HTMLCanvasElement} input
  * @returns {Promise<Array>} face-api results: detection, landmarks, descriptor
  */
-export async function detectFaces(input) {
+export async function detectFaces(
+  input,
+  { inputSize = 416, scoreThreshold = 0.5 } = {}
+) {
   const faceapi = await loadFaceEngine()
   return faceapi.detectAllFaces(
     input,
-    new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 })
+    new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold })
   ).withFaceLandmarks().withFaceDescriptors()
 }
 
