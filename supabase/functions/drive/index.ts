@@ -819,7 +819,7 @@ async function serveMedia(request, mediaId) {
     if (metaResponse.ok) {
       const meta = await metaResponse.json()
       if (meta.thumbnailLink) {
-        const thumbResponse = await fetch(`${meta.thumbnailLink}&sz=w640`)
+        const thumbResponse = await fetch(`${meta.thumbnailLink}&sz=w480`)
         if (thumbResponse.ok) {
           return new Response(thumbResponse.body, {
             status: 200,
