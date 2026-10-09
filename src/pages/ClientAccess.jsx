@@ -8,6 +8,7 @@ import { Section } from '@/components/ui/Section'
 import { ClientGallery } from '@/components/gallery/ClientGallery'
 import { InstagramGate } from '@/components/gallery/InstagramGate'
 import { FaceScanFlow } from '@/components/facescan/FaceScanFlow'
+import { QrScannerDialog } from '@/components/facescan/QrScannerDialog'
 import { useSEO } from '@/hooks/useSEO'
 import {
   clearClientSession,
@@ -34,6 +35,7 @@ export default function ClientAccess() {
   const [status, setStatus] = useState('idle')
   const [message, setMessage] = useState(null)
   const [scanOpen, setScanOpen] = useState(false)
+  const [qrScanOpen, setQrScanOpen] = useState(false)
 
   // A QR link is authoritative for the event it contains. If this tab
   // already has another client session, replace it instead of silently
@@ -94,7 +96,15 @@ export default function ClientAccess() {
   })
 
   const lookup = async (rawCode) => {
-    const code = String(rawCode || '').trim()
+    let code = String(rawCode || '').trim()
+    // QR scanners may return the entire URL rather than only the token.
+    try {
+      const parsed = new URL(code)
+      const qrToken = parsed.searchParams.get('event')
+      if (qrToken) code = qrToken.trim()
+    } catch {
+      // Plain event codes and opaque QR tokens are valid too.
+    }
     if (!code) {
       setStatus('idle')
       setMessage('Enter your event code first.')
@@ -110,28 +120,35 @@ export default function ClientAccess() {
       return
     }
 
-    const { data, error } = await supabase.rpc('lookup_event_by_code', { p_code: code })
-    if (error) {
+    try {
+      const { data, error } = await supabase.rpc('lookup_event_by_code', { p_code: code })
+      if (error) {
+        setStatus('error')
+        setMessage(friendlyDbError(error))
+        return
+      }
+
+      const record = Array.isArray(data) ? data[0] : data
+      if (!record) {
+        setStatus('invalid')
+        return
+      }
+
+      // Store the exact token/code used for lookup so QR links and typed
+      // access codes continue to authorize the same gallery RPCs.
+      const gateRequired = record.instagram_gate_enabled !== false
+      setClientSession(code, record, { gateCompleted: !gateRequired })
+      setStatus('idle')
+      setMessage(null)
+      if (gateRequired) {
+        gateRef.current = { code, event: record }
+        setGate({ code, event: record })
+      } else {
+        setSession({ code, event: record })
+      }
+    } catch (error) {
       setStatus('error')
-      setMessage(friendlyDbError(error))
-      return
-    }
-
-    const record = Array.isArray(data) ? data[0] : data
-    if (!record) {
-      setStatus('invalid')
-      return
-    }
-
-    const gateRequired = record.instagram_gate_enabled !== false
-    setClientSession(code, record, { gateCompleted: !gateRequired })
-    setStatus('idle')
-    setMessage(null)
-    if (gateRequired) {
-      gateRef.current = { code, event: record }
-      setGate({ code, event: record })
-    } else {
-      setSession({ code, event: record })
+      setMessage(friendlyDbError(error) || 'Could not connect to the gallery. Please try again.')
     }
   }
 
@@ -275,9 +292,13 @@ export default function ClientAccess() {
                 ready.
               </p>
               <div className="mp-access-card__fields">
+                <Button type="button" variant="secondary" onClick={() => setQrScanOpen(true)}>
+                  <Camera size={16} aria-hidden="true" />
+                  Open QR Scanner
+                </Button>
                 <p className="mp-access-card__note mp-access-card__note--plain">
-                  QR cards carry a private link for your event. Scanning one opens your gallery
-                  automatically.
+                  Scan the studio QR card here, or open it with your phone camera. If camera
+                  scanning is not supported, paste the link or enter the event code.
                 </p>
               </div>
             </div>
@@ -306,6 +327,15 @@ export default function ClientAccess() {
       </Section>
 
       <FaceScanFlow open={scanOpen} onClose={() => setScanOpen(false)} />
+      <QrScannerDialog
+        open={qrScanOpen}
+        onClose={() => setQrScanOpen(false)}
+        onDetected={(value) => {
+          setQrScanOpen(false)
+          setEventCode(value)
+          lookup(value)
+        }}
+      />
 
       {gate ? (
         <InstagramGate
