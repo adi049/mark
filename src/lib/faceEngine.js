@@ -40,7 +40,7 @@ export function loadFaceEngine() {
       }
       await faceapi.tf.ready()
       await faceapi.nets.tinyFaceDetector.loadFromUri(FACE_MODEL_URL)
-      await faceapi.nets.faceLandmark68TinyNet.loadFromUri(FACE_MODEL_URL)
+      await faceapi.nets.faceLandmark68Net.loadFromUri(FACE_MODEL_URL)
       await faceapi.nets.faceRecognitionNet.loadFromUri(FACE_MODEL_URL)
       return faceapi
     })()
