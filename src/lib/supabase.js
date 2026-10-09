@@ -22,13 +22,11 @@ import { createClient } from '@supabase/supabase-js'
 // GitHub Pages is a static frontend, so the Supabase publishable key is
 // intentionally safe to ship to the browser. Environment variables override
 // these production fallbacks when configured in a local or CI build.
-const supabaseUrl =
-  import.meta.env.VITE_SUPABASE_URL ||
-  'https://ftnmeccyphwsyleqgmkd.supabase.co'
-
-const supabaseAnonKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  'sb_publishable_8rBzvz2lrQN6RQAL4vxpTg_MPnHagZu'
+// MARKIPIE's production client must always talk to the same Supabase
+// project as the event/access-code database. Do not let a stale GitHub
+// Actions variable silently point Client Access at another project.
+const supabaseUrl = 'https://ftnmeccyphwsyleqgmkd.supabase.co'
+const supabaseAnonKey = 'sb_publishable_8rBzvz2lrQN6RQAL4vxpTg_MPnHagZu'
 
 /** True when both required environment variables are present. */
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
