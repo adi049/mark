@@ -1,5 +1,5 @@
 import '@tensorflow/tfjs-node'
-import * as faceapi from '@vladmandic/face-api'
+import * as faceapi from '@vladmandic/face-api/dist/face-api.node.js'
 import { createClient } from '@supabase/supabase-js'
 import { Canvas, Image, ImageData, loadImage } from 'canvas'
 import path from 'node:path'
@@ -13,6 +13,7 @@ const supabaseUrl = process.env.SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const eventIdFilter = process.env.EVENT_ID || ''
 const threshold = Number(process.env.FACE_SCORE_THRESHOLD || '0.35')
+const concurrency = Math.max(1, Math.min(4, Number(process.env.FACE_WORKER_CONCURRENCY || '3')))
 
 if (!supabaseUrl || !serviceKey) {
   throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required')
@@ -23,6 +24,8 @@ const db = createClient(supabaseUrl, serviceKey, {
 })
 
 async function loadModels() {
+  await faceapi.tf.setBackend('tensorflow')
+  await faceapi.tf.ready()
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath)
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath)
   await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath)
@@ -43,7 +46,6 @@ async function fetchThumb(event, mediaId) {
 async function indexMedia(event, media) {
   const bytes = await fetchThumb(event, media.id)
   const image = await loadImage(bytes)
-
   const results = await faceapi
     .detectAllFaces(
       image,
@@ -55,30 +57,14 @@ async function indexMedia(event, media) {
     .withFaceLandmarks(true)
     .withFaceDescriptors()
 
-  const { error: stateError } = await db
-    .from('face_index_state')
-    .upsert(
-      {
-        media_id: media.id,
-        event_id: event.id,
-        indexed_at: new Date().toISOString(),
-      },
-      { onConflict: 'media_id' },
-    )
-
-  if (stateError) {
-    throw stateError
-  }
-
+  // Replace embeddings first. Marking the image indexed is the final step,
+  // so transient write failures never make an image look successfully done.
   const { error: deleteError } = await db
     .from('face_embeddings')
     .delete()
     .eq('media_id', media.id)
     .eq('event_id', event.id)
-
-  if (deleteError) {
-    throw deleteError
-  }
+  if (deleteError) throw deleteError
 
   if (results.length > 0) {
     const rows = results.map((face, index) => ({
@@ -89,12 +75,17 @@ async function indexMedia(event, media) {
         .map((value) => Number(value.toFixed(6)))
         .join(',')}]`,
     }))
-
     const { error } = await db.from('face_embeddings').insert(rows)
-    if (error) {
-      throw error
-    }
+    if (error) throw error
   }
+
+  const { error: stateError } = await db
+    .from('face_index_state')
+    .upsert(
+      { media_id: media.id, event_id: event.id, indexed_at: new Date().toISOString() },
+      { onConflict: 'media_id' },
+    )
+  if (stateError) throw stateError
 
   return results.length
 }
@@ -111,63 +102,59 @@ async function processEvent(event) {
         .order('sort_order'),
       db.from('face_index_state').select('media_id').eq('event_id', event.id),
     ])
-
   if (mediaError) throw mediaError
   if (indexedError) throw indexedError
 
   const done = new Set((indexed ?? []).map((row) => row.media_id))
   const queue = (media ?? []).filter((item) => !done.has(item.id))
+  console.log(`[event ${event.id}] ${queue.length} photos pending; concurrency=${concurrency}`)
 
-  console.log(`[event ${event.id}] ${queue.length} photos pending`)
-
+  let next = 0
   let processed = 0
   let faces = 0
   let failed = 0
+  const startedAt = Date.now()
 
-  for (const item of queue) {
-    try {
-      const found = await indexMedia(event, item)
-      processed += 1
-      faces += found
-
-      if (processed % 10 === 0 || processed === queue.length) {
+  async function worker() {
+    while (true) {
+      const index = next++
+      if (index >= queue.length) return
+      const item = queue[index]
+      try {
+        const found = await indexMedia(event, item)
+        processed += 1
+        faces += found
+      } catch (error) {
+        failed += 1
+        console.warn(`[event ${event.id}] failed ${item.file_name}: ${error?.message ?? error}`)
+      }
+      if ((processed + failed) % 5 === 0 || processed + failed === queue.length) {
+        const elapsedSeconds = Math.max(1, Math.round((Date.now() - startedAt) / 1000))
         console.log(
-          `[event ${event.id}] ${processed}/${queue.length} processed, ${faces} faces, ${failed} failed`,
+          `[event ${event.id}] ${processed + failed}/${queue.length}; success=${processed}; faces=${faces}; failed=${failed}; elapsed=${elapsedSeconds}s`,
         )
       }
-    } catch (error) {
-      failed += 1
-      console.warn(
-        `[event ${event.id}] failed ${item.file_name}: ${error?.message ?? error}`,
-      )
     }
   }
 
-  return {
-    processed,
-    faces,
-    failed,
-    remaining: queue.length - processed,
-  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, () => worker()))
+  return { processed, faces, failed, remaining: queue.length - processed, elapsedSeconds: Math.round((Date.now() - startedAt) / 1000) }
 }
 
 await loadModels()
-console.log('Face models loaded with TensorFlow.js Node backend')
+console.log(`Native TensorFlow backend ready: ${faceapi.tf.getBackend()}`)
 
 let query = db
   .from('events')
   .select('id,access_code,face_scan_enabled,status')
   .eq('status', 'active')
   .eq('face_scan_enabled', true)
-
-if (eventIdFilter) {
-  query = query.eq('id', eventIdFilter)
-}
+if (eventIdFilter) query = query.eq('id', eventIdFilter)
 
 const { data: events, error } = await query
 if (error) throw error
 
 for (const event of events ?? []) {
   const result = await processEvent(event)
-  console.log(`[event ${event.id}] complete`, result)
+  console.log(`[event ${event.id}] result`, result)
 }
