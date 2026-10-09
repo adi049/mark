@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AlertTriangle, Check, Fingerprint, Loader2, RefreshCw, RotateCcw, Sparkles } from 'lucide-react'
 import { AdminModal } from '@/components/admin/AdminModal'
-import { detectFaces, loadFaceEngine } from '@/lib/faceEngine'
-import { mediaSrc } from '@/lib/drive'
+import { startFaceIndex } from '@/lib/drive'
 import { formatDate } from '@/lib/format'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
@@ -62,135 +61,67 @@ export function FaceIndexPanel({ event, refreshKey }) {
     }
   }, [refreshStats])
 
-  const runIndex = async (mode) => {
-    // mode: 'new' (only unindexed) or 'all'
-    if (run && run.phase !== 'complete') {
-      return
-    }
+  const runIndex = async () => {
+    if (run && run.phase !== 'complete') return
     setRunError(null)
-    setRun({ phase: 'preparing', scanned: 0, total: 0, faces: 0, skipped: 0 })
+    setRun({ phase: 'preparing', scanned: imagesIndexed, total: imagesTotal, faces: facesDetected, skipped: 0 })
 
     try {
-      await loadFaceEngine()
-      const { data, error } = await supabase.rpc('admin_event_media_list', {
-        p_event_id: event.id,
-      })
-      if (error) {
-        throw error
-      }
-      const allMedia = (Array.isArray(data) ? data : []).filter(
-        (item) => item.file_type === 'image'
-      )
-      const queue = mode === 'all' ? allMedia : allMedia.filter((item) => !item.indexed)
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) throw sessionError
+      const token = sessionData?.session?.access_token
+      if (!token) throw new Error('Admin session expired. Sign in again.')
 
-      if (!aliveRef.current) {
-        return
-      }
-      setRun({ phase: 'scanning', scanned: 0, total: queue.length, faces: 0, skipped: 0 })
+      await startFaceIndex(token, event.id)
 
-      let scanned = 0
-      let faces = 0
-      let skipped = 0
-      let batch = []
+      let lastIndexed = -1
+      let lastProgressAt = Date.now()
+      const startedAt = Date.now()
+      const maxWaitMs = 45 * 60 * 1000
+      const idleTimeoutMs = 8 * 60 * 1000
 
-      const saveBatch = async () => {
-        if (batch.length === 0) {
-          return
-        }
-        const rows = batch
-        batch = []
-        const { error: saveError } = await supabase.rpc('admin_store_face_embeddings', {
+      while (Date.now() - startedAt < maxWaitMs) {
+        if (!aliveRef.current) return
+        await new Promise((resolve) => setTimeout(resolve, 5000))
+
+        const { data, error } = await supabase.rpc('admin_face_index_stats', {
           p_event_id: event.id,
-          p_rows: rows,
         })
-        if (saveError) {
-          throw saveError
-        }
-      }
+        if (error) throw error
+        const record = Array.isArray(data) ? data[0] : data
+        const total = Number(record?.images_total ?? 0)
+        const indexed = Number(record?.images_indexed ?? 0)
+        const faceCount = Number(record?.faces_detected ?? 0)
 
-      // Do not scan the original Drive files one-by-one. The full originals
-      // can be huge, and sequential face detection makes large galleries
-      // painfully slow. Drive provides a protected 640px thumbnail that is
-      // enough for the detector and is much cheaper to download/decode.
-      const processItem = async (item) => {
-        try {
-          const image = await loadImage(mediaSrc(item.media_id, event.access_code, 'thumb'))
-          const found = await detectFaces(image, {
-            inputSize: 128,
-            scoreThreshold: 0.35,
-          })
-          if (found.length > 0) {
-            return {
-              rows: found.map((face, index) => ({
-                media_id: item.media_id,
-                face_index: index,
-                embedding: Array.from(face.descriptor).map((value) => Number(value.toFixed(6))),
-              })),
-              faces: found.length,
-              skipped: 0,
-            }
-          }
+        setStats(record)
+        setStatsStatus('ready')
+        setRun({
+          phase: indexed >= total && total > 0 ? 'complete' : 'scanning',
+          scanned: indexed,
+          total,
+          faces: faceCount,
+          skipped: 0,
+        })
 
-          // No face in this photo: still mark it as processed so
-          // incremental reindexing can skip it.
-          return {
-            rows: [{ media_id: item.media_id, face_index: 0, embedding: null }],
-            faces: 0,
-            skipped: 0,
-          }
-        } catch {
-          return { rows: [], faces: 0, skipped: 1 }
-        }
-      }
-
-      // A small amount of concurrency keeps the browser and network busy
-      // without trying to run hundreds of face detectors simultaneously.
-      for (let offset = 0; offset < queue.length; offset += SCAN_CONCURRENCY) {
-        if (!aliveRef.current) {
+        if (total > 0 && indexed >= total) {
+          refreshStats()
           return
         }
 
-        const chunk = queue.slice(offset, offset + SCAN_CONCURRENCY)
-        setRun({
-          phase: 'scanning',
-          scanned,
-          total: queue.length,
-          faces,
-          skipped,
-        })
-
-        const results = await Promise.all(chunk.map(processItem))
-        for (const result of results) {
-          batch.push(...result.rows)
-          faces += result.faces
-          skipped += result.skipped
-          scanned += 1
+        if (indexed > lastIndexed) {
+          lastIndexed = indexed
+          lastProgressAt = Date.now()
+        } else if (Date.now() - lastProgressAt > idleTimeoutMs) {
+          throw new Error(
+            'Background worker has not updated the index for 8 minutes. Check GitHub Actions secrets and the Drive Edge Function GITHUB_FACE_INDEX_TOKEN.',
+          )
         }
-
-        if (batch.length >= SAVE_BATCH) {
-          setRun((current) => ({ ...current, phase: 'saving' }))
-          await saveBatch()
-        }
-
-        setRun({
-          phase: 'scanning',
-          scanned,
-          total: queue.length,
-          faces,
-          skipped,
-        })
       }
 
-      setRun((current) => ({ ...current, phase: 'saving' }))
-      await saveBatch()
-      if (!aliveRef.current) {
-        return
-      }
-      setRun({ phase: 'complete', scanned, total: queue.length, faces, skipped })
-      refreshStats()
+      throw new Error('Background indexing is still running but exceeded the 45-minute UI wait. Check GitHub Actions for the worker result.')
     } catch (error) {
       if (aliveRef.current) {
-        setRunError(error?.message ?? 'The face index could not be completed.')
+        setRunError(error?.message ?? 'Background face indexing could not be started.')
         setRun(null)
         refreshStats()
       }
