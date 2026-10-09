@@ -44,34 +44,39 @@ export function FaceScanFlow({ open, onClose }) {
 
     setStatus('checking')
     setMessage(null)
-    const { data, error } = await supabase.rpc('lookup_event_by_code', { p_code: code })
-    if (error) {
-      setStatus('error')
-      setMessage(friendlyDbError(error))
-      return
-    }
-    const record = Array.isArray(data) ? data[0] : data
-    if (!record) {
-      setStatus('invalid')
-      return
-    }
-    if (!record.face_scan_enabled) {
-      setStatus('error')
-      setMessage('Face scan is not enabled for this event. Open your gallery with the event code.')
-      return
-    }
+    try {
+      const { data, error } = await supabase.rpc('lookup_event_by_code', { p_code: code })
+      if (error) {
+        setStatus('error')
+        setMessage(friendlyDbError(error))
+        return
+      }
+      const record = Array.isArray(data) ? data[0] : data
+      if (!record) {
+        setStatus('invalid')
+        return
+      }
+      if (!record.face_scan_enabled) {
+        setStatus('error')
+        setMessage('Face scan is not enabled for this event. Open your gallery with the event code.')
+        return
+      }
 
-    const captured = descriptor
-    // The face scan path keeps its own validated workflow and does not
-    // pass through the Instagram gate, so the session starts with that
-    // step already marked complete.
-    setClientSession(code, record, { gateCompleted: true })
-    setDescriptor(null)
-    setEventCode('')
-    setStatus('idle')
-    setMessage(null)
-    onClose?.()
-    navigate('/client-access', { state: { faceDescriptor: captured } })
+      const captured = descriptor
+      // The face scan path keeps its own validated workflow and does not
+      // pass through the Instagram gate, so the session starts with that
+      // step already marked complete.
+      setClientSession(code, record, { gateCompleted: true })
+      setDescriptor(null)
+      setEventCode('')
+      setStatus('idle')
+      setMessage(null)
+      onClose?.()
+      navigate('/client-access', { state: { faceDescriptor: captured } })
+    } catch (error) {
+      setStatus('error')
+      setMessage(friendlyDbError(error) || 'Could not connect to the gallery. Please try again.')
+    }
   }
 
   return (
