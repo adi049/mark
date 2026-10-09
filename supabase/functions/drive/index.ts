@@ -444,8 +444,8 @@ async function failJob(db, jobId, message) {
 async function triggerFaceIndex(eventId) {
   const token = env('GITHUB_FACE_INDEX_TOKEN')
   if (!token) {
-    console.warn('GITHUB_FACE_INDEX_TOKEN is not configured; face indexing will run on the scheduled worker.')
-    return
+    console.warn('GITHUB_FACE_INDEX_TOKEN is not configured.')
+    return false
   }
   const response = await fetch(
     'https://api.github.com/repos/adi049/mark/actions/workflows/face-index.yml/dispatches',
@@ -463,7 +463,9 @@ async function triggerFaceIndex(eventId) {
   if (!response.ok) {
     const detail = (await response.text()).slice(0, 300)
     console.error(`Could not dispatch face index worker (${response.status}): ${detail}`)
+    return false
   }
+  return true
 }
 
 const PHASE_LABELS = {
@@ -961,6 +963,28 @@ Deno.serve(async (request) => {
     }
 
     // ---- Admin endpoints ----
+    if (path === 'index-faces' && request.method === 'POST') {
+      const { db } = await requireAdmin(request)
+      const body = await request.json().catch(() => ({}))
+      const eventId = String(body?.eventId ?? '')
+      if (!/^[0-9a-f-]{36}$/i.test(eventId)) {
+        throw new HttpError(400, 'Choose a valid event before starting face indexing.')
+      }
+      const { data: event, error } = await db
+        .from('events')
+        .select('id, face_scan_enabled, status')
+        .eq('id', eventId)
+        .maybeSingle()
+      if (error || !event || event.status !== 'active' || !event.face_scan_enabled) {
+        throw new HttpError(400, 'Face scan must be enabled for an active event.')
+      }
+      const dispatched = await triggerFaceIndex(eventId)
+      if (!dispatched) {
+        throw new HttpError(503, 'Background face indexing is not configured yet. Check GITHUB_FACE_INDEX_TOKEN in the Drive Edge Function secrets.')
+      }
+      return jsonResponse({ queued: true, eventId }, 202)
+    }
+
     if (path === 'status' && request.method === 'GET') {
       const { db } = await requireAdmin(request)
       const { data } = await db.from('drive_connections').select('email, scope, updated_at').limit(1).maybeSingle()
