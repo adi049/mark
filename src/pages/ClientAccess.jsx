@@ -136,7 +136,7 @@ export default function ClientAccess() {
 
       // Store the exact token/code used for lookup so QR links and typed
       // access codes continue to authorize the same gallery RPCs.
-      const gateRequired = record.instagram_gate_enabled !== false
+      const gateRequired = record.instagram_gate_enabled === true
       setClientSession(code, record, { gateCompleted: !gateRequired })
       setStatus('idle')
       setMessage(null)
