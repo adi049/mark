@@ -5,8 +5,6 @@ import { startFaceIndex } from '@/lib/drive'
 import { formatDate } from '@/lib/format'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
-const SAVE_BATCH = 32
-const SCAN_CONCURRENCY = 6
 const INDEX_PHASES = [
   { key: 'preparing', label: 'Preparing' },
   { key: 'scanning', label: 'Scanning images' },
@@ -332,18 +330,4 @@ export function FaceIndexPanel({ event, refreshKey }) {
       ) : null}
     </div>
   )
-}
-
-/**
- * Loads an image with CORS enabled so the face engine can read its pixels.
- * @returns {Promise<HTMLImageElement>}
- */
-function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-    image.crossOrigin = 'anonymous'
-    image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('image load failed'))
-    image.src = src
-  })
 }
