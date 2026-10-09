@@ -97,6 +97,14 @@ export function startDriveSync(token, eventId) {
   })
 }
 
+/** Queue server-side face indexing for an event. */
+export function startFaceIndex(token, eventId) {
+  return driveFetch(token, '/index-faces', {
+    method: 'POST',
+    body: JSON.stringify({ eventId }),
+  })
+}
+
 /** Current state of an import or sync job. */
 export function getDriveJob(token, jobId) {
   return driveFetch(token, `/jobs/${jobId}`)
