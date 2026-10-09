@@ -59,7 +59,7 @@ export default function ClientAccess() {
     }
 
     if (stored) {
-      if (stored.event?.instagram_gate_enabled !== false && !stored.gateAt) {
+      if (stored.event?.instagram_gate_enabled === true && !stored.gateAt) {
         gateRef.current = stored
         setGate(stored)
       } else {
