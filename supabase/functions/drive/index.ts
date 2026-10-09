@@ -438,6 +438,34 @@ async function failJob(db, jobId, message) {
     .eq('id', jobId)
 }
 
+
+// Kick off the native TensorFlow worker immediately after Drive import/sync.
+// The periodic workflow remains a fallback if this optional secret is absent.
+async function triggerFaceIndex(eventId) {
+  const token = env('GITHUB_FACE_INDEX_TOKEN')
+  if (!token) {
+    console.warn('GITHUB_FACE_INDEX_TOKEN is not configured; face indexing will run on the scheduled worker.')
+    return
+  }
+  const response = await fetch(
+    'https://api.github.com/repos/adi049/mark/actions/workflows/face-index.yml/dispatches',
+    {
+      method: 'POST',
+      headers: {
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref: 'main', inputs: { event_id: eventId } }),
+    },
+  )
+  if (!response.ok) {
+    const detail = (await response.text()).slice(0, 300)
+    console.error(`Could not dispatch face index worker (${response.status}): ${detail}`)
+  }
+}
+
 const PHASE_LABELS = {
   connecting: 'Connecting',
   'reading-folder': 'Reading folder',
@@ -600,6 +628,7 @@ async function runImport(db, jobId, eventId, urlOrId, userId) {
       insertedMedia,
       duplicates,
     })
+    if (photos > 0) await triggerFaceIndex(eventId)
   } catch (error) {
     await failJob(db, jobId, error instanceof HttpError ? error.message : 'The import failed. Please try again.')
   }
@@ -617,6 +646,7 @@ async function runSync(db, jobId, eventId) {
     const result = await syncWalk(db, jobId, eventId, event.drive_folder_id)
     await db.from('events').update({ drive_synced_at: new Date().toISOString() }).eq('id', eventId)
     await finishJob(db, jobId, result)
+    if (Number(result?.photos ?? 0) > 0) await triggerFaceIndex(eventId)
   } catch (error) {
     await failJob(db, jobId, error instanceof HttpError ? error.message : 'The sync failed. Please try again.')
   }
