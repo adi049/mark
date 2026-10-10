@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowRight, Camera, CheckCircle2, Info, KeyRound, Phone, QrCode, ScanFace, User } from 'lucide-react'
+import { ArrowRight, Camera, CheckCircle2, Info, KeyRound, QrCode, ScanFace, User } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { PageHero } from '@/components/ui/PageHero'
