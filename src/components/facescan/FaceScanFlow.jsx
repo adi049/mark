@@ -80,6 +80,20 @@ export function FaceScanFlow({ open, onClose, visitor }) {
         return
       }
 
+      // Send a best-effort notification to the client linked to this event.
+      void supabase.functions.invoke('notify-gallery-access', {
+        body: {
+          code,
+          name: visitor.name,
+          phone: visitor.phone,
+          method: 'face',
+        },
+      }).then(({ error: emailError }) => {
+        if (emailError) console.warn('Gallery access email notification failed:', emailError.message)
+      }).catch((emailError) => {
+        console.warn('Gallery access email notification failed:', emailError)
+      })
+
       const captured = descriptor
       // The face scan path keeps its own validated workflow and does not
       // pass through the Instagram gate, so the session starts with that
