@@ -76,6 +76,11 @@ export function InstagramGate({ event, onCountdownEnd, onContinue }) {
       opened = false
     }
     setAutoBlocked(!opened)
+    // If the browser blocks a delayed new tab, navigate this tab to Instagram.
+    // The gate completion is already saved, so browser Back returns to the gallery.
+    if (!opened) {
+      window.location.assign(INSTAGRAM_URL)
+    }
   }
 
   const counting = count > 0
