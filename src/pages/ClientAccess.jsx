@@ -197,6 +197,8 @@ export default function ClientAccess() {
     setEventCode('')
     setStatus('idle')
     setMessage(null)
+    setVisitor(null)
+    setVisitorForm({ name: '', phone: '' })
   }
 
   const handleVisitorChange = (field, value) => {
@@ -212,7 +214,7 @@ export default function ClientAccess() {
     const name = visitorForm.name.trim().replace(/\s+/g, ' ')
     const phone = visitorForm.phone.replace(/\D/g, '')
 
-    if (name.length < 2 || !/^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ .'-]{1,99}$/.test(name)) {
+    if (name.length < 2 || !/^[\p{L}][\p{L}\p{M} .'-]{1,99}$/u.test(name)) {
       setVisitorStatus('error')
       setVisitorMessage('Please enter a valid name.')
       return
@@ -296,36 +298,30 @@ export default function ClientAccess() {
               <div className="mp-access-card__fields">
                 <label className="mp-field">
                   <span className="mp-field__label">Full name</span>
-                  <div className="mp-field__input-wrap">
-                    <User size={16} aria-hidden="true" />
-                    <input
-                      className="mp-field__input"
-                      type="text"
-                      value={visitorForm.name}
-                      onChange={(event) => handleVisitorChange('name', event.target.value)}
-                      placeholder="Your full name"
-                      autoComplete="name"
-                      maxLength={100}
-                      required
-                    />
-                  </div>
+                  <input
+                    className="mp-field__input"
+                    type="text"
+                    value={visitorForm.name}
+                    onChange={(event) => handleVisitorChange('name', event.target.value)}
+                    placeholder="Your full name"
+                    autoComplete="name"
+                    maxLength={100}
+                    required
+                  />
                 </label>
                 <label className="mp-field">
                   <span className="mp-field__label">Mobile number</span>
-                  <div className="mp-field__input-wrap">
-                    <Phone size={16} aria-hidden="true" />
-                    <input
-                      className="mp-field__input"
-                      type="tel"
-                      inputMode="numeric"
-                      value={visitorForm.phone}
-                      onChange={(event) => handleVisitorChange('phone', event.target.value)}
-                      placeholder="10-digit mobile number"
-                      autoComplete="tel"
-                      maxLength={10}
-                      required
-                    />
-                  </div>
+                  <input
+                    className="mp-field__input"
+                    type="tel"
+                    inputMode="numeric"
+                    value={visitorForm.phone}
+                    onChange={(event) => handleVisitorChange('phone', event.target.value)}
+                    placeholder="10-digit mobile number"
+                    autoComplete="tel"
+                    maxLength={10}
+                    required
+                  />
                 </label>
                 <Button type="submit">
                   Continue to Gallery Access
