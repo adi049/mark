@@ -455,8 +455,6 @@ export default function ClientAccess() {
           lookup(value, 'qr')
         }}
       />
-      {visitor ? null : null}
-
       {gate ? (
         <InstagramGate
           event={gate.event}
