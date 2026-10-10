@@ -101,7 +101,7 @@ export default function ClientAccess() {
     path: '/client-access',
   })
 
-  const lookup = async (rawCode, accessMethod = 'code') => {
+  const lookup = async (rawCode, accessMethod = 'code', contactOverride = null) => {
     let code = String(rawCode || '').trim()
     // QR scanners may return the entire URL rather than only the token.
     try {
@@ -117,7 +117,8 @@ export default function ClientAccess() {
       return
     }
 
-    if (!visitor?.name || !visitor?.phone) {
+    const accessVisitor = contactOverride ?? visitor
+    if (!accessVisitor?.name || !accessVisitor?.phone) {
       setMessage('Enter your name and valid 10-digit mobile number first.')
       return
     }
@@ -147,8 +148,8 @@ export default function ClientAccess() {
 
       const { error: accessLogError } = await supabase.rpc('record_gallery_access', {
         p_code: code,
-        p_name: visitor.name,
-        p_phone: visitor.phone,
+        p_name: accessVisitor.name,
+        p_phone: accessVisitor.phone,
         p_method: accessMethod,
       })
       if (accessLogError) {
@@ -229,7 +230,7 @@ export default function ClientAccess() {
     setVisitorMessage(null)
 
     if (pendingToken) {
-      lookup(pendingToken, 'qr')
+      lookup(pendingToken, 'qr', contact)
       setPendingToken(null)
     }
   }
@@ -455,7 +456,7 @@ export default function ClientAccess() {
         onDetected={(value) => {
           setQrScanOpen(false)
           setEventCode(value)
-          lookup(value)
+          lookup(value, 'qr')
         }}
       />
       {visitor ? null : null}
