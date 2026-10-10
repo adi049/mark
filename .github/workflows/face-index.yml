@@ -29,9 +29,18 @@ jobs:
         working-directory: worker
         run: npm install --no-audit --no-fund
 
+      - name: Validate worker secrets
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.MARKIPIE_SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "::error::Missing repository secret MARKIPIE_SUPABASE_SERVICE_ROLE_KEY. Add the Supabase service-role key in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
       - name: Build face index
         env:
-          SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          SUPABASE_URL: https://ftnmeccyphwsyleqgmkd.supabase.co
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.MARKIPIE_SUPABASE_SERVICE_ROLE_KEY }}
           EVENT_ID: ${{ inputs.event_id }}
         run: npm --prefix worker run index
