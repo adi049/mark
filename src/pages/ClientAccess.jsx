@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ArrowRight, Camera, CheckCircle2, Info, KeyRound, QrCode, ScanFace } from 'lucide-react'
+import { ArrowRight, Camera, CheckCircle2, Info, KeyRound, Phone, QrCode, ScanFace, User } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
 import { PageHero } from '@/components/ui/PageHero'
@@ -36,6 +36,11 @@ export default function ClientAccess() {
   const [message, setMessage] = useState(null)
   const [scanOpen, setScanOpen] = useState(false)
   const [qrScanOpen, setQrScanOpen] = useState(false)
+  const [visitor, setVisitor] = useState(null)
+  const [visitorForm, setVisitorForm] = useState({ name: '', phone: '' })
+  const [visitorStatus, setVisitorStatus] = useState('idle')
+  const [visitorMessage, setVisitorMessage] = useState(null)
+  const [pendingToken, setPendingToken] = useState(null)
 
   // A QR link is authoritative for the event it contains. If this tab
   // already has another client session, replace it instead of silently
@@ -53,7 +58,7 @@ export default function ClientAccess() {
         setGate(null)
         gateRef.current = null
         setEventCode(incoming)
-        lookup(incoming)
+        setPendingToken(incoming)
         return
       }
     }
@@ -69,8 +74,9 @@ export default function ClientAccess() {
     }
 
     if (token) {
-      setEventCode(token)
-      lookup(token)
+      const incoming = token.trim()
+      setEventCode(incoming)
+      setPendingToken(incoming)
     }
     // Runs once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -95,7 +101,7 @@ export default function ClientAccess() {
     path: '/client-access',
   })
 
-  const lookup = async (rawCode) => {
+  const lookup = async (rawCode, accessMethod = 'code') => {
     let code = String(rawCode || '').trim()
     // QR scanners may return the entire URL rather than only the token.
     try {
@@ -108,6 +114,11 @@ export default function ClientAccess() {
     if (!code) {
       setStatus('idle')
       setMessage('Enter your event code first.')
+      return
+    }
+
+    if (!visitor?.name || !visitor?.phone) {
+      setMessage('Enter your name and valid 10-digit mobile number first.')
       return
     }
 
@@ -131,6 +142,18 @@ export default function ClientAccess() {
       const record = Array.isArray(data) ? data[0] : data
       if (!record) {
         setStatus('invalid')
+        return
+      }
+
+      const { error: accessLogError } = await supabase.rpc('record_gallery_access', {
+        p_code: code,
+        p_name: visitor.name,
+        p_phone: visitor.phone,
+        p_method: accessMethod,
+      })
+      if (accessLogError) {
+        setStatus('error')
+        setMessage('We could not save your access details securely. Please try again.')
         return
       }
 
@@ -173,6 +196,42 @@ export default function ClientAccess() {
     setEventCode('')
     setStatus('idle')
     setMessage(null)
+  }
+
+  const handleVisitorChange = (field, value) => {
+    setVisitorForm((current) => ({ ...current, [field]: value }))
+    setVisitorMessage(null)
+    if (visitorStatus !== 'idle') {
+      setVisitorStatus('idle')
+    }
+  }
+
+  const handleVisitorSubmit = (submitEvent) => {
+    submitEvent.preventDefault()
+    const name = visitorForm.name.trim().replace(/\s+/g, ' ')
+    const phone = visitorForm.phone.replace(/\D/g, '')
+
+    if (name.length < 2 || !/^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ .'-]{1,99}$/.test(name)) {
+      setVisitorStatus('error')
+      setVisitorMessage('Please enter a valid name.')
+      return
+    }
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      setVisitorStatus('error')
+      setVisitorMessage('Please enter a valid 10-digit Indian mobile number.')
+      return
+    }
+
+    const contact = { name, phone }
+    setVisitor(contact)
+    setVisitorForm({ name, phone })
+    setVisitorStatus('idle')
+    setVisitorMessage(null)
+
+    if (pendingToken) {
+      lookup(pendingToken, 'qr')
+      setPendingToken(null)
+    }
   }
 
   const handleCodeChange = (value) => {
@@ -224,7 +283,66 @@ export default function ClientAccess() {
             </p>
           </div>
 
-          <div className="mp-client-access__grid">
+          {!visitor ? (
+            <form className="mp-access-card mp-access-card--blue" onSubmit={handleVisitorSubmit}>
+              <span className="mp-access-card__icon">
+                <User size={24} aria-hidden="true" />
+              </span>
+              <h2 className="mp-access-card__title">Your Details</h2>
+              <p className="mp-access-card__text">
+                Enter your name and mobile number before opening your private event gallery.
+              </p>
+              <div className="mp-access-card__fields">
+                <label className="mp-field">
+                  <span className="mp-field__label">Full name</span>
+                  <div className="mp-field__input-wrap">
+                    <User size={16} aria-hidden="true" />
+                    <input
+                      className="mp-field__input"
+                      type="text"
+                      value={visitorForm.name}
+                      onChange={(event) => handleVisitorChange('name', event.target.value)}
+                      placeholder="Your full name"
+                      autoComplete="name"
+                      maxLength={100}
+                      required
+                    />
+                  </div>
+                </label>
+                <label className="mp-field">
+                  <span className="mp-field__label">Mobile number</span>
+                  <div className="mp-field__input-wrap">
+                    <Phone size={16} aria-hidden="true" />
+                    <input
+                      className="mp-field__input"
+                      type="tel"
+                      inputMode="numeric"
+                      value={visitorForm.phone}
+                      onChange={(event) => handleVisitorChange('phone', event.target.value)}
+                      placeholder="10-digit mobile number"
+                      autoComplete="tel"
+                      maxLength={10}
+                      required
+                    />
+                  </div>
+                </label>
+                <Button type="submit">
+                  Continue to Gallery Access
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Button>
+              </div>
+              {visitorStatus === 'error' ? (
+                <p className="mp-access-card__note mp-access-card__note--error" role="alert">
+                  {visitorMessage}
+                </p>
+              ) : null}
+              <p className="mp-access-card__note">
+                Your details are used for this gallery access record and are not used as an OTP login.
+              </p>
+            </form>
+          ) : null}
+
+          {visitor ? <div className="mp-client-access__grid">
             <form
               id="event-code"
               className="mp-access-card mp-access-card--blue"
@@ -322,11 +440,15 @@ export default function ClientAccess() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> : null}
         </Container>
       </Section>
 
-      <FaceScanFlow open={scanOpen} onClose={() => setScanOpen(false)} />
+      <FaceScanFlow
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        visitor={visitor}
+      />
       <QrScannerDialog
         open={qrScanOpen}
         onClose={() => setQrScanOpen(false)}
@@ -336,6 +458,7 @@ export default function ClientAccess() {
           lookup(value)
         }}
       />
+      {visitor ? null : null}
 
       {gate ? (
         <InstagramGate
