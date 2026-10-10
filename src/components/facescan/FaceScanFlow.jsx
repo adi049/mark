@@ -13,7 +13,7 @@ import { friendlyDbError } from '@/lib/dbErrors'
  * is asked for, and the search stays scoped to that one authorized event.
  * On success the visitor lands in their gallery with the matches open.
  */
-export function FaceScanFlow({ open, onClose }) {
+export function FaceScanFlow({ open, onClose, visitor }) {
   const navigate = useNavigate()
   const [descriptor, setDescriptor] = useState(null)
   const [eventCode, setEventCode] = useState('')
@@ -59,6 +59,24 @@ export function FaceScanFlow({ open, onClose }) {
       if (!record.face_scan_enabled) {
         setStatus('error')
         setMessage('Face scan is not enabled for this event. Open your gallery with the event code.')
+        return
+      }
+
+      if (!visitor?.name || !visitor?.phone) {
+        setStatus('error')
+        setMessage('Enter your name and valid mobile number before starting face access.')
+        return
+      }
+
+      const { error: accessLogError } = await supabase.rpc('record_gallery_access', {
+        p_code: code,
+        p_name: visitor.name,
+        p_phone: visitor.phone,
+        p_method: 'face',
+      })
+      if (accessLogError) {
+        setStatus('error')
+        setMessage('We could not save your access details securely. Please try again.')
         return
       }
 
