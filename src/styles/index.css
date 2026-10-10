@@ -41,3 +41,43 @@
 @import './components/blogs.css';
 @import './components/contact.css';
 @import './components/legal.css';
+
+
+/* Best-effort gallery privacy deterrence. This cannot disable OS-level screenshots. */
+body.mp-page-hidden .mp-app-shell,
+body.mp-capture-warning .mp-app-shell {
+  filter: blur(22px) !important;
+  opacity: 0.08 !important;
+  pointer-events: none !important;
+}
+.mp-capture-warning::after {
+  content: "PRIVATE GALLERY";
+  position: fixed;
+  z-index: 2147483647;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgba(18, 24, 31, 0.94);
+  font: 700 1.25rem/1.2 system-ui, sans-serif;
+  letter-spacing: 0.18em;
+  pointer-events: none;
+}
+@media print {
+  body .mp-app-shell {
+    display: none !important;
+  }
+  body::after {
+    content: "Printing is disabled for private galleries.";
+    display: block;
+    padding: 3rem;
+    font: 700 1.2rem system-ui, sans-serif;
+  }
+}
+.mp-cg img,
+.mp-viewer img,
+.mp-fm img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
