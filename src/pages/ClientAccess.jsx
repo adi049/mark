@@ -158,6 +158,21 @@ export default function ClientAccess() {
         return
       }
 
+      // Notify the email address attached to this event's client record.
+      // Email delivery is best-effort and never blocks gallery access.
+      void supabase.functions.invoke('notify-gallery-access', {
+        body: {
+          code,
+          name: accessVisitor.name,
+          phone: accessVisitor.phone,
+          method: accessMethod,
+        },
+      }).then(({ error: emailError }) => {
+        if (emailError) console.warn('Gallery access email notification failed:', emailError.message)
+      }).catch((emailError) => {
+        console.warn('Gallery access email notification failed:', emailError)
+      })
+
       // Store the exact token/code used for lookup so QR links and typed
       // access codes continue to authorize the same gallery RPCs.
       const gateRequired = record.instagram_gate_enabled === true
