@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { OpeningIntro } from '@/components/intro/OpeningIntro'
@@ -35,6 +35,35 @@ const AdminProtected = lazy(() =>
   import('@/components/admin/AdminShell').then((m) => ({ default: m.AdminProtected }))
 )
 
+function ContentProtection() {
+  useEffect(() => {
+    const inGallery = (target) => target?.closest?.('.mp-cg, .mp-viewer, .mp-fm')
+    const blockContextMenu = (event) => { if (inGallery(event.target)) event.preventDefault() }
+    const blockDrag = (event) => { if (inGallery(event.target)) event.preventDefault() }
+    const blockShortcuts = (event) => {
+      const key = String(event.key || '').toLowerCase()
+      if ((event.ctrlKey || event.metaKey) && ['s', 'u', 'p'].includes(key)) event.preventDefault()
+      if (event.key === 'PrintScreen') {
+        document.body.classList.add('mp-capture-warning')
+        window.setTimeout(() => document.body.classList.remove('mp-capture-warning'), 1200)
+      }
+    }
+    const onVisibility = () => document.body.classList.toggle('mp-page-hidden', document.visibilityState === 'hidden')
+    document.addEventListener('contextmenu', blockContextMenu)
+    document.addEventListener('dragstart', blockDrag)
+    document.addEventListener('keydown', blockShortcuts)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      document.removeEventListener('contextmenu', blockContextMenu)
+      document.removeEventListener('dragstart', blockDrag)
+      document.removeEventListener('keydown', blockShortcuts)
+      document.removeEventListener('visibilitychange', onVisibility)
+      document.body.classList.remove('mp-page-hidden', 'mp-capture-warning')
+    }
+  }, [])
+  return null
+}
+
 export default function App() {
   const [showIntro, setShowIntro] = useState(shouldRunIntro)
 
@@ -46,6 +75,7 @@ export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL === '/' ? undefined : import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <ScrollToTop />
+      <ContentProtection />
       <div className="mp-app-shell" inert={showIntro}>
         <Suspense fallback={<RouteLoading />}>
           <Routes>
