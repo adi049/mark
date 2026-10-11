@@ -117,12 +117,20 @@ export function getDriveJob(token, jobId) {
  */
 export function mediaSrc(mediaId, code, variant = 'full') {
   const base = driveBase()
+  if (String(code ?? '').startsWith('face:')) {
+    const token = String(code).slice(5)
+    return `${base}/media/${mediaId}?ft=${encodeURIComponent(token)}&v=${variant}`
+  }
   return `${base}/media/${mediaId}?t=${encodeURIComponent(code)}&v=${variant}`
 }
 
 /** Same stream, but with a download disposition. */
 export function mediaDownloadSrc(mediaId, code) {
   const base = driveBase()
+  if (String(code ?? '').startsWith('face:')) {
+    const token = String(code).slice(5)
+    return `${base}/media/${mediaId}?ft=${encodeURIComponent(token)}&v=full&download=1`
+  }
   return `${base}/media/${mediaId}?t=${encodeURIComponent(code)}&v=full&download=1`
 }
 
