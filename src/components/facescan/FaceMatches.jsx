@@ -15,7 +15,7 @@ const PAGE_SIZE = 24
  * and shows the results through the same grid, viewer, watermark,
  * download and reaction system as the rest of the gallery.
  */
-export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScanAgain }) {
+export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScanAgain, initialItems = null, faceOnly = false }) {
   const [status, setStatus] = useState('searching') // searching | done | empty | error
   const [items, setItems] = useState([])
   const [error, setError] = useState(null)
@@ -23,7 +23,13 @@ export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScan
   const [viewerIndex, setViewerIndex] = useState(null)
 
   useEffect(() => {
-    if (!descriptor || !isSupabaseConfigured) {
+    if (Array.isArray(initialItems)) {
+      setItems(initialItems)
+      setVisible(PAGE_SIZE)
+      setStatus(initialItems.length === 0 ? 'empty' : 'done')
+      return undefined
+    }
+    if (!descriptor || !code || String(code).startsWith('face:') || !isSupabaseConfigured) {
       return undefined
     }
     let alive = true
@@ -75,7 +81,7 @@ export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScan
     }
     // One search per descriptor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [descriptor, code])
+  }, [descriptor, code, initialItems])
 
   const updateReaction = (mediaId, reaction) => {
     setItems((previous) =>
@@ -92,7 +98,7 @@ export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScan
           <ChevronLeft size={15} aria-hidden="true" />
           Back to gallery
         </button>
-        <p className="mp-cg-section__crumb">{event?.name}</p>
+        <p className="mp-cg-section__crumb">{event?.name ?? (faceOnly ? 'Face-only access' : '')}</p>
       </div>
 
       <header className="mp-fm__head">
@@ -138,7 +144,7 @@ export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScan
           <MediaGrid
             media={shown}
             code={code}
-            watermark={eventPermissions(event).watermark}
+            watermark={faceOnly ? true : eventPermissions(event).watermark}
             onOpen={(item, index) => setViewerIndex(index)}
           />
           {shown.length < items.length ? (
@@ -163,6 +169,7 @@ export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScan
           code={code}
           event={event}
           sessionId={sessionId}
+          faceOnly={faceOnly}
           onClose={() => setViewerIndex(null)}
           onIndexChange={setViewerIndex}
           onReaction={updateReaction}
