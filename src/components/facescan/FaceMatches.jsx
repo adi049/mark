@@ -46,7 +46,20 @@ export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScan
         if (payload.error) {
           throw payload.error
         }
-        const rows = Array.isArray(payload.data) ? payload.data : []
+        let rows = Array.isArray(payload.data) ? payload.data : []
+        // Real-world camera scans can differ from a reference photo. If the
+        // conservative first pass returns nothing, retry once with a slightly
+        // wider threshold before showing "no matches".
+        if (rows.length === 0) {
+          const retry = await supabase.rpc('search_event_faces', {
+            p_code: code,
+            p_embedding: descriptorToText(descriptor),
+            p_threshold: Math.min(0.7, FACE_MATCH_THRESHOLD + 0.1),
+            p_session_id: sessionId,
+          })
+          if (retry.error) throw retry.error
+          rows = Array.isArray(retry.data) ? retry.data : []
+        }
         setItems(rows)
         setVisible(PAGE_SIZE)
         setStatus(rows.length === 0 ? 'empty' : 'done')
