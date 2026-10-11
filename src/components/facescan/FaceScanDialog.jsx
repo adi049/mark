@@ -6,7 +6,7 @@ import { loadFaceEngine } from '@/lib/faceEngine'
 const DETECT_INTERVAL_MS = 240
 const MIN_FACE_RATIO = 0.16
 const MIN_FACE_LUMA = 52
-const STABLE_DISTANCE = 0.32
+const STABLE_DISTANCE = 0.26
 
 export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Scan', children }) {
   const videoRef = useRef(null)
@@ -99,7 +99,7 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
       const results = await faceapi
         .detectAllFaces(
           video,
-          new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.45 })
+          new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.50 })
         )
         .withFaceLandmarks()
         .withFaceDescriptors()
