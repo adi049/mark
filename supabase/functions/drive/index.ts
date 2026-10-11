@@ -797,27 +797,46 @@ async function serveMedia(request, mediaId) {
     return jsonResponse({ message: 'Missing event access.' }, 401)
   }
 
+  const faceToken = url.searchParams.get('ft') ?? ''
   const db = adminClient()
-  const normalizedCode = code.trim().toUpperCase()
-  let { data: event } = await db
-    .from('events')
-    .select('id, status, access_code, qr_token, download_enabled')
-    .eq('status', 'active')
-    .eq('access_code', normalizedCode)
-    .maybeSingle()
-  if (!event) {
-    const qrLookup = await db
+  let event = null
+  let faceGrantValid = false
+
+  if (faceToken) {
+    const { data: grant } = await db
+      .from('face_access_grants')
+      .select('media_ids, expires_at')
+      .eq('token', faceToken)
+      .gt('expires_at', new Date().toISOString())
+      .maybeSingle()
+    if (!grant || !Array.isArray(grant.media_ids) || !grant.media_ids.includes(mediaId)) {
+      return jsonResponse({ message: 'This face-only photo access has expired or does not include this photo.' }, 401)
+    }
+    faceGrantValid = true
+  } else {
+    const normalizedCode = code.trim().toUpperCase()
+    let { data: matchedEvent } = await db
       .from('events')
       .select('id, status, access_code, qr_token, download_enabled')
       .eq('status', 'active')
-      .eq('qr_token', code.trim())
+      .eq('access_code', normalizedCode)
       .maybeSingle()
-    event = qrLookup.data ?? null
+    if (!matchedEvent) {
+      const qrLookup = await db
+        .from('events')
+        .select('id, status, access_code, qr_token, download_enabled')
+        .eq('status', 'active')
+        .eq('qr_token', code.trim())
+        .maybeSingle()
+      matchedEvent = qrLookup.data ?? null
+    }
+    event = matchedEvent
+    if (!event) {
+      return jsonResponse({ message: 'This gallery link is no longer valid.' }, 401)
+    }
   }
-  if (!event) {
-    return jsonResponse({ message: 'This gallery link is no longer valid.' }, 401)
-  }
-  if (download && event.download_enabled === false) {
+
+  if (download && (faceGrantValid || event?.download_enabled === false)) {
     // The UI hides the button, but the server is the real gate: downloads
     // are refused here even when the URL is called directly.
     return jsonResponse({ message: 'Downloads are turned off for this event.' }, 403)
@@ -828,8 +847,21 @@ async function serveMedia(request, mediaId) {
     .select('id, event_id, external_file_id, file_name, file_type, mime_type, status')
     .eq('id', mediaId)
     .maybeSingle()
-  if (!media || media.event_id !== event.id || media.status !== 'available') {
+  if (!media || (!faceGrantValid && media.event_id !== event?.id) || media.status !== 'available') {
     return jsonResponse({ message: 'This media is not available.' }, 404)
+  }
+
+  if (faceGrantValid) {
+    const { data: activeFaceEvent } = await db
+      .from('events')
+      .select('id')
+      .eq('id', media.event_id)
+      .eq('status', 'active')
+      .eq('face_scan_enabled', true)
+      .maybeSingle()
+    if (!activeFaceEvent) {
+      return jsonResponse({ message: 'Face-only access for this event is no longer available.' }, 403)
+    }
   }
 
   const token = await googleToken(db)
