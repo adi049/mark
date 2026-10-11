@@ -47,6 +47,7 @@ export function MediaViewer({
   onIndexChange,
   onNearEnd,
   onReaction,
+  faceOnly = false,
 }) {
   const item = items[index]
   const closeRef = useRef(null)
@@ -143,8 +144,8 @@ export function MediaViewer({
     return null
   }
 
-  const canDownload = permissions.download
-  const canReact = permissions.reactions
+  const canDownload = !faceOnly && permissions.download
+  const canReact = !faceOnly && permissions.reactions
   const showWatermark = permissions.watermark
 
   return (
