@@ -143,13 +143,14 @@ async function processEvent(event) {
 }
 
 await loadModels()
-console.log(`TensorFlow.js WASM backend ready: ${faceapi.tf.getBackend()}; production mode enabled; concurrency=${concurrency}`)
+console.log(`TensorFlow native backend ready: ${faceapi.tf.getBackend()}; production mode enabled; concurrency=${concurrency}`)
 
 let query = db
   .from('events')
   .select('id,access_code,face_scan_enabled,status')
   .eq('status', 'active')
   .eq('face_scan_enabled', true)
+  .order('created_at', { ascending: false })
 if (eventIdFilter) query = query.eq('id', eventIdFilter)
 
 const { data: events, error } = await query
