@@ -13,7 +13,7 @@ const supabaseUrl = process.env.SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const eventIdFilter = process.env.EVENT_ID || ''
 const threshold = Number(process.env.FACE_SCORE_THRESHOLD || '0.35')
-const concurrency = Math.max(1, Math.min(4, Number(process.env.FACE_WORKER_CONCURRENCY || '3')))
+const concurrency = Math.max(1, Math.min(4, Number(process.env.FACE_WORKER_CONCURRENCY || '1')))
 
 if (!supabaseUrl || !serviceKey) {
   throw new Error('SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required')
@@ -25,6 +25,7 @@ const db = createClient(supabaseUrl, serviceKey, {
 
 async function loadModels() {
   await faceapi.tf.setBackend('tensorflow')
+  await faceapi.tf.enableProdMode()
   await faceapi.tf.ready()
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath)
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath)
@@ -142,7 +143,7 @@ async function processEvent(event) {
 }
 
 await loadModels()
-console.log(`Native TensorFlow backend ready: ${faceapi.tf.getBackend()}`)
+console.log(`Native TensorFlow backend ready: ${faceapi.tf.getBackend()}; production mode enabled; concurrency=${concurrency}`)
 
 let query = db
   .from('events')
