@@ -144,3 +144,64 @@ export const IMPORT_PHASES = [
   { key: 'importing-metadata', label: 'Importing metadata' },
   { key: 'complete', label: 'Complete' },
 ]
+
+
+/**
+ * Downloads an image through the protected media endpoint. When watermarking
+ * is enabled, the browser burns the same MARKIPIE pattern into the downloaded
+ * file instead of downloading the unwatermarked source.
+ */
+export async function downloadMedia(id, code, fileName, watermark = false) {
+  const url = mediaDownloadSrc(id, code)
+  const response = await fetch(url)
+  if (!response.ok) throw new Error('This photo could not be downloaded right now.')
+  const blob = await response.blob()
+
+  if (!watermark || !blob.type.startsWith('image/')) {
+    triggerBrowserDownload(blob, fileName)
+    return
+  }
+
+  const bitmap = await createImageBitmap(blob)
+  const canvas = document.createElement('canvas')
+  canvas.width = bitmap.width
+  canvas.height = bitmap.height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('Your browser could not prepare the watermarked download.')
+
+  ctx.drawImage(bitmap, 0, 0)
+  const fontSize = Math.max(22, Math.round(Math.min(bitmap.width, bitmap.height) * 0.045))
+  const stepX = Math.max(260, Math.round(bitmap.width * 0.32))
+  const stepY = Math.max(180, Math.round(bitmap.height * 0.22))
+  ctx.save()
+  ctx.globalAlpha = 0.28
+  ctx.fillStyle = '#ffffff'
+  ctx.font = `700 ${fontSize}px Arial, sans-serif`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.translate(bitmap.width / 2, bitmap.height / 2)
+  ctx.rotate(-Math.PI / 8)
+  for (let y = -bitmap.height * 1.5; y <= bitmap.height * 1.5; y += stepY) {
+    for (let x = -bitmap.width * 1.5; x <= bitmap.width * 1.5; x += stepX) {
+      ctx.fillText('MARKIPIE', x, y)
+    }
+  }
+  ctx.restore()
+  bitmap.close()
+
+  const output = await new Promise((resolve, reject) => {
+    canvas.toBlob((value) => value ? resolve(value) : reject(new Error('Could not create the watermarked download.')), 'image/jpeg', 0.94)
+  })
+  triggerBrowserDownload(output, fileName)
+}
+
+function triggerBrowserDownload(blob, fileName) {
+  const objectUrl = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = objectUrl
+  anchor.download = fileName || 'markipie-photo'
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
+}
