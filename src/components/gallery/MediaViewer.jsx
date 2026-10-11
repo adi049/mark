@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { Watermark } from '@/components/gallery/Watermark'
 import { eventPermissions } from '@/lib/eventPermissions'
-import { mediaDownloadSrc, mediaSrc } from '@/lib/drive'
+import { downloadMedia, mediaSrc } from '@/lib/drive'
 import { supabase } from '@/lib/supabase'
 
 const SWIPE_THRESHOLD = 48
@@ -54,6 +54,7 @@ export function MediaViewer({
   const touchRef = useRef(null)
   const stageRef = useRef(null)
   const [reaction, setReaction] = useState(null)
+  const [downloadState, setDownloadState] = useState('idle')
   const permissions = eventPermissions(event)
 
   // Reset per item state when the viewer moves to another media item.
@@ -148,6 +149,25 @@ export function MediaViewer({
   const canReact = !faceOnly && permissions.reactions
   const showWatermark = permissions.watermark
 
+  const handleDownload = async () => {
+    if (!item || !canDownload || downloadState === 'loading') return
+    setDownloadState('loading')
+    try {
+      await downloadMedia(
+        item.id,
+        code,
+        (item.file_name ?? 'markipie-photo').replace(/[^\w.\-]+/g, '_'),
+        showWatermark
+      )
+    } catch (error) {
+      console.error('Download failed:', error)
+      setDownloadState('error')
+      window.setTimeout(() => setDownloadState('idle'), 2500)
+    } finally {
+      if (downloadState !== 'error') setDownloadState('idle')
+    }
+  }
+
   return (
     <div className="mp-viewer" role="dialog" aria-modal="true" aria-label="Media viewer">
       <div className="mp-viewer__top">
@@ -156,15 +176,16 @@ export function MediaViewer({
         </p>
         <div className="mp-viewer__actions">
           {canDownload ? (
-            <a
+            <button
+              type="button"
               className="mp-viewer__btn"
-              href={mediaDownloadSrc(item.id, code)}
-              download={(item.file_name ?? 'markipie').replace(/[^\w.\-]+/g, '_')}
+              onClick={handleDownload}
+              disabled={downloadState === 'loading'}
               aria-label="Download this media"
             >
               <Download size={16} aria-hidden="true" />
-              <span>Download</span>
-            </a>
+              <span>{downloadState === 'loading' ? 'Preparing…' : downloadState === 'error' ? 'Try again' : 'Download'}</span>
+            </button>
           ) : null}
           {item.file_type !== 'video' ? (
             <button
