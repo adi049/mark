@@ -793,11 +793,10 @@ async function serveMedia(request, mediaId) {
   const code = url.searchParams.get('t') ?? ''
   const variant = url.searchParams.get('v') === 'thumb' ? 'thumb' : 'full'
   const download = url.searchParams.get('download') === '1'
-  if (!code) {
-    return jsonResponse({ message: 'Missing event access.' }, 401)
-  }
-
   const faceToken = url.searchParams.get('ft') ?? ''
+  if (!code && !faceToken) {
+    return jsonResponse({ message: 'Missing event or face-only access.' }, 401)
+  }
   const db = adminClient()
   let event = null
   let faceGrantValid = false
