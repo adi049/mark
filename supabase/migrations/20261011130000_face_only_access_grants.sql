@@ -35,7 +35,7 @@ begin
       and m.status = 'available' and m.file_type = 'image'
     group by m.id, m.event_id, m.file_name, m.file_type, e.name
   ), limited as materialized (
-    select * from matched where distance < p_threshold order by distance asc limit 240
+    select matched.* from matched where matched.distance < p_threshold order by matched.distance asc limit 240
   )
   select array_agg(limited.id) into v_media_ids from limited;
 
