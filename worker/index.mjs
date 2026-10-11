@@ -25,14 +25,15 @@ const db = createClient(supabaseUrl, serviceKey, {
 })
 
 async function loadModels() {
-  wasm.setWasmPaths('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/')
+  const wasmPath = path.resolve(root, 'node_modules', '@tensorflow', 'tfjs-backend-wasm', 'dist') + path.sep
+  wasm.setWasmPaths(wasmPath)
   await tf.setBackend('wasm')
   await faceapi.tf.setBackend('wasm')
   await faceapi.tf.enableProdMode()
   await tf.ready()
   await faceapi.tf.ready()
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath)
-  await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath)
+  await faceapi.nets.faceLandmark68TinyNet.loadFromDisk(modelPath)
   await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath)
 }
 
