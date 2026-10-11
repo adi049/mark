@@ -21,7 +21,7 @@ export const FACE_MODEL_URL = `${import.meta.env.BASE_URL || '/'}models`
  * if matches feel too strict or too loose. The server clamps the value it
  * receives to a sane band.
  */
-export const FACE_MATCH_THRESHOLD = 0.5
+export const FACE_MATCH_THRESHOLD = 0.6
 
 let enginePromise = null
 
