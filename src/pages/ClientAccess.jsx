@@ -57,7 +57,7 @@ export default function ClientAccess() {
       setSession(null)
       setGate(null)
       gateRef.current = null
-      setEventCode(incoming)
+      setEventCode('')
       setPendingToken(incoming)
       return
     }
@@ -219,7 +219,7 @@ export default function ClientAccess() {
       setSession(null)
       setGate(null)
       gateRef.current = null
-      setEventCode(code)
+      setEventCode('')
       setQrEvent({ code, event: record })
       setPendingToken(null)
       setStatus('idle')
