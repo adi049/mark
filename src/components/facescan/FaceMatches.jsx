@@ -35,7 +35,7 @@ export function FaceMatches({ code, event, sessionId, descriptor, onExit, onScan
         p_threshold: FACE_MATCH_THRESHOLD,
         p_session_id: sessionId,
       })
-      .then((response) => {
+      .then(async (response) => {
         if (!alive) {
           return
         }
