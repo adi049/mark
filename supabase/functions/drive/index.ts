@@ -980,9 +980,10 @@ Deno.serve(async (request) => {
       }
       const dispatched = await triggerFaceIndex(eventId)
       if (!dispatched) {
-        throw new HttpError(503, 'GitHub rejected the face-index worker dispatch. Check GITHUB_FACE_INDEX_TOKEN in Drive Edge Function secrets and grant its token Actions: Read and write access to repository adi049/mark. See Supabase Edge Function logs for the exact HTTP status.')
+        console.warn(`Face index dispatch unavailable for ${eventId}; scheduled worker fallback will pick up active face-scan events.`)
+        return jsonResponse({ queued: true, eventId, fallback: 'scheduled-worker' }, 202)
       }
-      return jsonResponse({ queued: true, eventId }, 202)
+      return jsonResponse({ queued: true, eventId, fallback: null }, 202)
     }
 
     if (path === 'status' && request.method === 'GET') {
