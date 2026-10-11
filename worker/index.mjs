@@ -1,6 +1,5 @@
-import * as tf from '@tensorflow/tfjs'
-import * as wasm from '@tensorflow/tfjs-backend-wasm'
-import * as faceapi from '@vladmandic/face-api/dist/face-api.node-wasm.js'
+import '@tensorflow/tfjs-node'
+import * as faceapi from '@vladmandic/face-api/dist/face-api.node.js'
 import { createClient } from '@supabase/supabase-js'
 import { Canvas, Image, ImageData, loadImage } from 'canvas'
 import path from 'node:path'
@@ -25,18 +24,14 @@ const db = createClient(supabaseUrl, serviceKey, {
 })
 
 async function loadModels() {
-  const wasmPath = path.resolve(root, 'node_modules', '@tensorflow', 'tfjs-backend-wasm', 'dist') + path.sep
-  wasm.setWasmPaths(wasmPath)
-  await tf.setBackend('wasm')
-  await faceapi.tf.setBackend('wasm')
+  await faceapi.tf.setBackend('tensorflow')
   await faceapi.tf.enableProdMode()
-  await tf.ready()
   await faceapi.tf.ready()
+  console.log(`TensorFlow native backend ready: ${faceapi.tf.getBackend()}; concurrency=${concurrency}`)
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath)
-  await faceapi.nets.faceLandmark68TinyNet.loadFromDisk(modelPath)
+  await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath)
   await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath)
 }
-
 async function fetchThumb(event, mediaId) {
   const url =
     `${supabaseUrl}/functions/v1/drive/media/${mediaId}?t=${encodeURIComponent(
@@ -60,7 +55,7 @@ async function indexMedia(event, media) {
         scoreThreshold: threshold,
       }),
     )
-    .withFaceLandmarks(true)
+    .withFaceLandmarks()
     .withFaceDescriptors()
 
   // Replace embeddings first. Marking the image indexed is the final step,
