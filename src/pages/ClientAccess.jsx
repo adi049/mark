@@ -297,13 +297,14 @@ export default function ClientAccess() {
               initialItems={matches}
               faceOnly
               onExit={() => navigate('/client-access', { replace: true, state: null })}
-              onScanAgain={() => navigate('/client-access', { replace: true, state: null })}
+              onScanAgain={() => setScanOpen(true)}
             />
             <div className="mp-access-card__fields">
               <Button variant="secondary" onClick={() => navigate('/client-access', { replace: true, state: null })}>
                 Back to Client Access
               </Button>
             </div>
+            <FaceScanFlow open={scanOpen} onClose={() => setScanOpen(false)} />
           </Container>
         </Section>
       </>
