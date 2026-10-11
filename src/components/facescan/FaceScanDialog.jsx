@@ -8,16 +8,6 @@ const MIN_FACE_RATIO = 0.16
 const MIN_FACE_LUMA = 52
 const STABLE_DISTANCE = 0.32
 
-/**
- * Live camera face scan. The camera stream, detection and the face
- * descriptor all stay in the browser; only the finished 128-number
- * descriptor is handed to the parent. The stream is stopped the moment a
- * face is captured, the dialog closes or the component unmounts.
- *
- * Optional children replace the camera body entirely, which lets callers
- * (for example the code entry step in FaceScanFlow) reuse the same dialog
- * shell for the step after the scan.
- */
 export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Scan', children }) {
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
@@ -25,9 +15,10 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
   const timerRef = useRef(null)
   const busyRef = useRef(false)
   const lastDescriptorRef = useRef(null)
-  const aliveRef = useRef(true)
+  const aliveRef = useRef(false)
+  const engineRef = useRef(null)
 
-  const [phase, setPhase] = useState('idle') // idle | models | camera | scanning | captured
+  const [phase, setPhase] = useState('idle')
   const [hint, setHint] = useState('Position your face inside the frame.')
   const [cameraError, setCameraError] = useState(null)
   const [modelError, setModelError] = useState(null)
@@ -40,25 +31,16 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
     const stream = streamRef.current
     if (stream) {
       for (const track of stream.getTracks()) {
-        try {
-          track.stop()
-        } catch {
-          // Track already stopped.
-        }
+        try { track.stop() } catch {}
       }
       streamRef.current = null
     }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
-    }
+    if (videoRef.current) videoRef.current.srcObject = null
   }, [])
 
-  // Every exit path lands here: unmount, close, capture or restart.
   useEffect(() => {
     aliveRef.current = open
-    if (!open) {
-      stopCamera()
-    }
+    if (!open) stopCamera()
     return () => {
       aliveRef.current = false
       stopCamera()
@@ -73,9 +55,7 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
   const measureLuma = (box) => {
     const canvas = canvasRef.current
     const video = videoRef.current
-    if (!canvas || !video) {
-      return 255
-    }
+    if (!canvas || !video) return 255
     const w = 32
     const h = 32
     canvas.width = w
@@ -105,20 +85,17 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
     setPhase('captured')
     setHint('Face captured.')
     window.setTimeout(() => {
-      if (aliveRef.current) {
-        onCaptured?.(Array.from(descriptor))
-      }
+      if (aliveRef.current) onCaptured?.(Array.from(descriptor))
     }, 450)
   }
 
   const scanTick = async () => {
     const video = videoRef.current
-    if (busyRef.current || !video || video.readyState < 2) {
-      return
-    }
+    const faceapi = engineRef.current
+    if (busyRef.current || !video || video.readyState < 2 || !faceapi) return
+
     busyRef.current = true
     try {
-      const faceapi = await loadFaceEngine()
       const results = await faceapi
         .detectAllFaces(
           video,
@@ -127,9 +104,7 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
         .withFaceLandmarks()
         .withFaceDescriptors()
 
-      if (!aliveRef.current) {
-        return
-      }
+      if (!aliveRef.current) return
 
       if (results.length === 0) {
         lastDescriptorRef.current = null
@@ -164,9 +139,7 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
       lastDescriptorRef.current = Array.from(descriptor)
       setHint('Hold still.')
     } catch {
-      if (aliveRef.current) {
-        setHint('Position your face inside the frame.')
-      }
+      if (aliveRef.current) setHint('Position your face inside the frame.')
     } finally {
       busyRef.current = false
     }
@@ -176,76 +149,79 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
     setCameraError(null)
     setModelError(null)
     lastDescriptorRef.current = null
-    setPhase('models')
-    setHint('Preparing the face scan.')
-    try {
-      await loadFaceEngine()
-    } catch {
-      setModelError('The face scan could not load on this device. Check your connection and try again.')
-      setPhase('idle')
-      return
-    }
-    if (!aliveRef.current) {
-      return
-    }
-
+    engineRef.current = null
     setPhase('camera')
-    setHint('Starting the camera.')
+    setHint('Starting the camera…')
+
     if (!navigator.mediaDevices?.getUserMedia) {
       setCameraError('This browser does not support camera scanning. Try Chrome or Safari.')
       setPhase('idle')
       return
     }
+
+    // Camera starts BEFORE the face model. This prevents model download time
+    // from blocking the live preview on phones and laptops.
+    let stream
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'user' },
+          width: { ideal: 640, max: 1280 },
+          height: { ideal: 480, max: 720 },
+          frameRate: { ideal: 30, max: 30 },
+        },
         audio: false,
       })
+
       if (!aliveRef.current) {
-        for (const track of stream.getTracks()) {
-          track.stop()
-        }
+        stream.getTracks().forEach((track) => track.stop())
         return
       }
+
       streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play().catch(() => {})
+      const video = videoRef.current
+      if (video) {
+        video.srcObject = stream
+        video.muted = true
+        video.playsInline = true
+        await video.play().catch(() => {})
       }
-      setPhase('scanning')
-      setHint('Position your face inside the frame.')
-      timerRef.current = window.setInterval(() => {
-        scanTick()
-      }, DETECT_INTERVAL_MS)
+
+      setHint('Camera ready. Preparing face scan…')
     } catch (error) {
       setCameraError(friendlyCameraError(error))
       setPhase('idle')
+      return
     }
+
+    // Only after the preview is visible do we load the face model.
+    try {
+      engineRef.current = await loadFaceEngine()
+    } catch {
+      stopCamera()
+      setModelError('The face scan could not load on this device. Check your connection and try again.')
+      setPhase('idle')
+      return
+    }
+
+    if (!aliveRef.current || !streamRef.current) return
+
+    setPhase('scanning')
+    setHint('Position your face inside the frame.')
+    timerRef.current = window.setInterval(scanTick, DETECT_INTERVAL_MS)
+    scanTick()
   }
 
-  if (!open) {
-    return null
-  }
+  if (!open) return null
 
   if (children) {
     return (
       <AnimatePresence>
-        <motion.div
-          className="mp-fs"
-          role="dialog"
-          aria-modal="true"
-          aria-label={title}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
-        >
+        <motion.div className="mp-fs" role="dialog" aria-modal="true" aria-label={title}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
           <div className="mp-fs__card">
             <div className="mp-fs__head">
-              <div>
-                <p className="mp-fs__eyebrow">Markipie AI</p>
-                <h2 className="mp-fs__title">{title}</h2>
-              </div>
+              <div><p className="mp-fs__eyebrow">Markipie AI</p><h2 className="mp-fs__title">{title}</h2></div>
               <button type="button" className="mp-fs__close" onClick={close} aria-label="Close face scan">
                 <X size={18} aria-hidden="true" />
               </button>
@@ -259,22 +235,11 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
 
   return (
     <AnimatePresence>
-      <motion.div
-        className="mp-fs"
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.18 }}
-      >
+      <motion.div className="mp-fs" role="dialog" aria-modal="true" aria-label={title}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
         <div className="mp-fs__card">
           <div className="mp-fs__head">
-            <div>
-              <p className="mp-fs__eyebrow">Markipie AI</p>
-              <h2 className="mp-fs__title">{title}</h2>
-            </div>
+            <div><p className="mp-fs__eyebrow">Markipie AI</p><h2 className="mp-fs__title">{title}</h2></div>
             <button type="button" className="mp-fs__close" onClick={close} aria-label="Close face scan">
               <X size={18} aria-hidden="true" />
             </button>
@@ -282,89 +247,46 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
 
           {phase === 'idle' ? (
             <div className="mp-fs__start">
-              <span className="mp-fs__orb" aria-hidden="true">
-                <Camera size={26} aria-hidden="true" />
-              </span>
-              <p className="mp-fs__lead">
-                Use the camera to find your photos. Nothing is photographed or saved.
-              </p>
-              {cameraError ? (
-                <p className="mp-fs__error" role="alert">
-                  <CameraOff size={14} aria-hidden="true" /> {cameraError}
-                </p>
-              ) : null}
-              {modelError ? (
-                <p className="mp-fs__error" role="alert">
-                  {modelError}
-                </p>
-              ) : null}
+              <span className="mp-fs__orb" aria-hidden="true"><Camera size={26} aria-hidden="true" /></span>
+              <p className="mp-fs__lead">Use the camera to find your photos. Nothing is photographed or saved.</p>
+              {cameraError ? <p className="mp-fs__error" role="alert"><CameraOff size={14} aria-hidden="true" /> {cameraError}</p> : null}
+              {modelError ? <p className="mp-fs__error" role="alert">{modelError}</p> : null}
               <button type="button" className="mp-fs__primary" onClick={start}>
-                <Camera size={16} aria-hidden="true" />
-                Start Camera
+                <Camera size={16} aria-hidden="true" /> Start Camera
               </button>
-              <p className="mp-fs__privacy">
-                Your camera is used only to find matching photos. Your camera image is not
-                uploaded as a gallery photo.
-              </p>
+              <p className="mp-fs__privacy">Your camera is used only to find matching photos. Your camera image is not uploaded as a gallery photo.</p>
             </div>
           ) : (
             <div className="mp-fs__stage">
               <div className="mp-fs__frame">
-                <video
-                  ref={videoRef}
-                  className="mp-fs__video"
-                  autoPlay
-                  playsInline
-                  muted
-                  aria-label="Camera preview"
-                />
+                <video ref={videoRef} className="mp-fs__video" autoPlay playsInline muted aria-label="Camera preview" />
                 <canvas ref={canvasRef} className="mp-fs__sample" aria-hidden="true" />
                 {phase === 'scanning' ? (
-                  <motion.div
-                    className="mp-fs__guide"
-                    initial={{ opacity: 0, scale: 0.96 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.25 }}
-                    aria-hidden="true"
-                  >
+                  <motion.div className="mp-fs__guide" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.25 }} aria-hidden="true">
                     <span className="mp-fs__corner mp-fs__corner--tl" />
                     <span className="mp-fs__corner mp-fs__corner--tr" />
                     <span className="mp-fs__corner mp-fs__corner--bl" />
                     <span className="mp-fs__corner mp-fs__corner--br" />
-                    <motion.span
-                      className="mp-fs__line"
-                      animate={{ top: ['8%', '88%', '8%'] }}
-                      transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
-                    />
+                    <motion.span className="mp-fs__line" animate={{ top: ['8%', '88%', '8%'] }}
+                      transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }} />
                   </motion.div>
                 ) : null}
                 {phase === 'captured' ? (
-                  <motion.div
-                    className="mp-fs__done"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    aria-hidden="true"
-                  >
+                  <motion.div className="mp-fs__done" initial={{ opacity: 0 }} animate={{ opacity: 1 }} aria-hidden="true">
                     <Loader2 size={18} className="mp-fs__spin" />
                   </motion.div>
                 ) : null}
-                {phase === 'models' || phase === 'camera' ? (
-                  <div className="mp-fs__veil" aria-hidden="true">
-                    <Loader2 size={20} className="mp-fs__spin" />
-                  </div>
+                {phase === 'camera' ? (
+                  <div className="mp-fs__veil" aria-hidden="true"><Loader2 size={20} className="mp-fs__spin" /></div>
                 ) : null}
               </div>
               <p className="mp-fs__hint" role="status" aria-live="polite">
                 {phase === 'captured' ? 'Finding your photos.' : hint}
               </p>
               <div className="mp-fs__foot">
-                <p className="mp-fs__privacy">
-                  Your camera is used only to find matching photos. Your camera image is not
-                  uploaded as a gallery photo.
-                </p>
-                <button type="button" className="mp-fs__stop" onClick={close}>
-                  Stop Camera
-                </button>
+                <p className="mp-fs__privacy">Your camera is used only to find matching photos. Your camera image is not uploaded as a gallery photo.</p>
+                <button type="button" className="mp-fs__stop" onClick={close}>Stop Camera</button>
               </div>
             </div>
           )}
@@ -374,10 +296,6 @@ export function FaceScanDialog({ open, onClose, onCaptured, title = 'AI Face Sca
   )
 }
 
-/**
- * Maps raw getUserMedia failures to human wording. Raw browser errors are
- * never shown.
- */
 function friendlyCameraError(error) {
   const name = error?.name
   if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
