@@ -9,7 +9,7 @@ import { isSupabaseConfigured, supabase } from '@/lib/supabase'
  * containing only photos matched to the captured face. No event code or full
  * gallery session is created.
  */
-export function FaceScanFlow({ open, onClose }) {
+export function FaceScanFlow({ open, onClose, eventId }) {
   const navigate = useNavigate()
   const [searching, setSearching] = useState(false)
 
@@ -24,7 +24,9 @@ export function FaceScanFlow({ open, onClose }) {
 
     setSearching(true)
     try {
-      const { data, error } = await supabase.rpc('search_all_event_faces', {
+      if (!eventId) throw new Error('Please open the event QR first, then start Face Scan.')
+      const { data, error } = await supabase.rpc('search_event_faces', {
+        p_event_id: eventId,
         p_embedding: descriptorToText(descriptor),
         p_threshold: 0.6,
       })
