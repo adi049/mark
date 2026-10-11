@@ -1,4 +1,4 @@
-import '@tensorflow/tfjs-node'
+import * as tf from '@tensorflow/tfjs'
 import * as faceapi from '@vladmandic/face-api/dist/face-api.node.js'
 import { createClient } from '@supabase/supabase-js'
 import { Canvas, Image, ImageData, loadImage } from 'canvas'
@@ -24,7 +24,7 @@ const db = createClient(supabaseUrl, serviceKey, {
 })
 
 async function loadModels() {
-  await faceapi.tf.setBackend('tensorflow')
+  await faceapi.tf.setBackend('cpu')
   await faceapi.tf.enableProdMode()
   await faceapi.tf.ready()
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath)
@@ -143,7 +143,7 @@ async function processEvent(event) {
 }
 
 await loadModels()
-console.log(`Native TensorFlow backend ready: ${faceapi.tf.getBackend()}; production mode enabled; concurrency=${concurrency}`)
+console.log(`TensorFlow.js CPU backend ready: ${faceapi.tf.getBackend()}; production mode enabled; concurrency=${concurrency}`)
 
 let query = db
   .from('events')
