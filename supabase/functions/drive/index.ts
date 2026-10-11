@@ -980,7 +980,7 @@ Deno.serve(async (request) => {
       }
       const dispatched = await triggerFaceIndex(eventId)
       if (!dispatched) {
-        throw new HttpError(503, 'Background face indexing is not configured yet. Check GITHUB_FACE_INDEX_TOKEN in the Drive Edge Function secrets.')
+        throw new HttpError(503, 'GitHub rejected the face-index worker dispatch. Check GITHUB_FACE_INDEX_TOKEN in Drive Edge Function secrets and grant its token Actions: Read and write access to repository adi049/mark. See Supabase Edge Function logs for the exact HTTP status.')
       }
       return jsonResponse({ queued: true, eventId }, 202)
     }
