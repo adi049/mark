@@ -46,6 +46,7 @@ function markipieSeo() {
       if (!SITE_URL) {
         return
       }
+      fs.mkdirSync(path.resolve(outDir), { recursive: true })
       const today = new Date().toISOString().slice(0, 10)
       const urls = SITEMAP_PATHS.map(
         (p) =>
