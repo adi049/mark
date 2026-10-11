@@ -8,6 +8,7 @@ import { Section } from '@/components/ui/Section'
 import { ClientGallery } from '@/components/gallery/ClientGallery'
 import { InstagramGate } from '@/components/gallery/InstagramGate'
 import { FaceScanFlow } from '@/components/facescan/FaceScanFlow'
+import { FaceMatches } from '@/components/facescan/FaceMatches'
 import { QrScannerDialog } from '@/components/facescan/QrScannerDialog'
 import { useSEO } from '@/hooks/useSEO'
 import {
@@ -258,6 +259,55 @@ export default function ClientAccess() {
       setStatus('idle')
       setMessage(null)
     }
+  }
+
+  if (location.state?.faceOnlyError) {
+    return (
+      <>
+        <PageHero eyebrow="Face-only access" title="Your photo search" description="Only matching photos are shown here. Your full event gallery remains locked." />
+        <Section className="mp-client-access">
+          <Container>
+            <div className="mp-cg__state mp-cg__state--error" role="alert">
+              <p>{location.state.faceOnlyError}</p>
+              <Button onClick={() => navigate('/client-access', { replace: true, state: null })}>Back to Client Access</Button>
+            </div>
+          </Container>
+        </Section>
+      </>
+    )
+  }
+
+  if (Array.isArray(location.state?.faceOnlyMatches)) {
+    const matches = location.state.faceOnlyMatches
+    const faceToken = location.state.faceToken
+    return (
+      <>
+        <PageHero
+          eyebrow="Face-only access"
+          title="Your matching photos"
+          description="This view contains only photos matched to your face. It does not open the event's full gallery."
+        />
+        <Section className="mp-client-gallery">
+          <Container>
+            <FaceMatches
+              code={faceToken ? `face:${faceToken}` : ''}
+              event={null}
+              sessionId={null}
+              descriptor={null}
+              initialItems={matches}
+              faceOnly
+              onExit={() => navigate('/client-access', { replace: true, state: null })}
+              onScanAgain={() => navigate('/client-access', { replace: true, state: null })}
+            />
+            <div className="mp-access-card__fields">
+              <Button variant="secondary" onClick={() => navigate('/client-access', { replace: true, state: null })}>
+                Back to Client Access
+              </Button>
+            </div>
+          </Container>
+        </Section>
+      </>
+    )
   }
 
   if (session) {
