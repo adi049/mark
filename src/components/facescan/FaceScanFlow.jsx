@@ -28,11 +28,23 @@ export function FaceScanFlow({ open, onClose, eventId }) {
       const { data, error } = await supabase.rpc('search_event_faces', {
         p_event_id: eventId,
         p_embedding: descriptorToText(descriptor),
-        p_threshold: 0.6,
+        p_threshold: 0.52,
       })
       if (error) throw error
 
-      const rows = Array.isArray(data) ? data : []
+      let rows = Array.isArray(data) ? data : []
+      // If the strict pass is empty, allow a controlled second pass. This
+      // improves recall for camera-vs-photo differences without making the
+      // primary result set overly loose.
+      if (rows.length === 0) {
+        const retry = await supabase.rpc('search_event_faces', {
+          p_event_id: eventId,
+          p_embedding: descriptorToText(descriptor),
+          p_threshold: 0.58,
+        })
+        if (retry.error) throw retry.error
+        rows = Array.isArray(retry.data) ? retry.data : []
+      }
       navigate('/client-access', {
         state: {
           faceOnlyMatches: rows,
