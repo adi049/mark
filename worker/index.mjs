@@ -32,11 +32,11 @@ async function loadModels() {
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath)
   await faceapi.nets.faceRecognitionNet.loadFromDisk(modelPath)
 }
-async function fetchThumb(event, mediaId) {
+async function fetchFaceImage(event, mediaId) {
   const url =
     `${supabaseUrl}/functions/v1/drive/media/${mediaId}?t=${encodeURIComponent(
       event.access_code,
-    )}&v=thumb`
+    )}&v=full`
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error(`thumbnail HTTP ${response.status}`)
@@ -45,7 +45,7 @@ async function fetchThumb(event, mediaId) {
 }
 
 async function indexMedia(event, media) {
-  const bytes = await fetchThumb(event, media.id)
+  const bytes = await fetchFaceImage(event, media.id)
   const image = await loadImage(bytes)
   const results = await faceapi
     .detectAllFaces(
