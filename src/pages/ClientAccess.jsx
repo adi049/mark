@@ -42,6 +42,7 @@ export default function ClientAccess() {
   const [visitorStatus, setVisitorStatus] = useState('idle')
   const [visitorMessage, setVisitorMessage] = useState(null)
   const [pendingToken, setPendingToken] = useState(null)
+  const [qrEvent, setQrEvent] = useState(null)
 
   // A QR link is authoritative for the event it contains. If this tab
   // already has another client session, replace it instead of silently
@@ -52,16 +53,13 @@ export default function ClientAccess() {
 
     if (token && token.trim()) {
       const incoming = token.trim()
-      const sameSession = stored?.code?.trim() === incoming
-      if (!sameSession) {
-        clearClientSession()
-        setSession(null)
-        setGate(null)
-        gateRef.current = null
-        setEventCode(incoming)
-        setPendingToken(incoming)
-        return
-      }
+      clearClientSession()
+      setSession(null)
+      setGate(null)
+      gateRef.current = null
+      setEventCode(incoming)
+      setPendingToken(incoming)
+      return
     }
 
     if (stored) {
@@ -192,6 +190,48 @@ export default function ClientAccess() {
     }
   }
 
+  const prepareQrEvent = async (rawValue) => {
+    let code = String(rawValue || '').trim()
+    try {
+      const parsed = new URL(code)
+      const token = parsed.searchParams.get('event')
+      if (token) code = token.trim()
+    } catch {}
+
+    if (!code || !isSupabaseConfigured || !supabase) {
+      setMessage('This QR code is not valid for a Markipie event.')
+      return false
+    }
+
+    setStatus('checking')
+    setMessage(null)
+    try {
+      const { data, error } = await supabase.rpc('lookup_event_by_code', { p_code: code })
+      if (error) throw error
+      const record = Array.isArray(data) ? data[0] : data
+      if (!record) {
+        setStatus('invalid')
+        setMessage('This QR code is invalid or the event is no longer active.')
+        return false
+      }
+
+      clearClientSession()
+      setSession(null)
+      setGate(null)
+      gateRef.current = null
+      setEventCode(code)
+      setQrEvent({ code, event: record })
+      setPendingToken(null)
+      setStatus('idle')
+      setMessage(null)
+      return true
+    } catch (error) {
+      setStatus('error')
+      setMessage(friendlyDbError(error) || 'Could not open this event. Please try again.')
+      return false
+    }
+  }
+
   const handleGateCountdownEnd = () => {
     const stored = completeClientGate()
     if (stored) {
@@ -215,6 +255,8 @@ export default function ClientAccess() {
     setMessage(null)
     setVisitor(null)
     setVisitorForm({ name: '', phone: '' })
+    setQrEvent(null)
+    setPendingToken(null)
   }
 
   const handleVisitorChange = (field, value) => {
@@ -248,8 +290,7 @@ export default function ClientAccess() {
     setVisitorMessage(null)
 
     if (pendingToken) {
-      lookup(pendingToken, 'qr', contact)
-      setPendingToken(null)
+      void prepareQrEvent(pendingToken)
     }
   }
 
@@ -291,7 +332,7 @@ export default function ClientAccess() {
           <Container>
             <FaceMatches
               code={faceToken ? `face:${faceToken}` : ''}
-              event={null}
+              event={location.state?.faceOnlyMatches?.[0]?.event_id ? qrEvent?.event : null}
               sessionId={null}
               descriptor={null}
               initialItems={matches}
@@ -305,6 +346,99 @@ export default function ClientAccess() {
               </Button>
             </div>
             <FaceScanFlow open={scanOpen} onClose={() => setScanOpen(false)} />
+          </Container>
+        </Section>
+      </>
+    )
+  }
+
+  if (qrEvent && visitor) {
+    return (
+      <>
+        <PageHero
+          eyebrow="Event access"
+          title={qrEvent.event?.name ?? 'Your event'}
+          description="Choose how you want to access your photos. The full gallery requires the event code."
+        />
+        <Section className="mp-client-access">
+          <Container>
+            <div className="mp-callout" role="note">
+              <Info size={18} aria-hidden="true" />
+              <p>
+                You reached this event through its QR code. Choose Event Code for the complete
+                gallery, or Scan Your Photo to see only photos that match your face.
+              </p>
+            </div>
+
+            <div className="mp-client-access__grid">
+              <form
+                id="event-code"
+                className="mp-access-card mp-access-card--blue"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  lookup(qrEvent.code)
+                }}
+              >
+                <span className="mp-access-card__icon"><KeyRound size={24} aria-hidden="true" /></span>
+                <h2 className="mp-access-card__title">Event Code</h2>
+                <p className="mp-access-card__text">
+                  Enter the client code to unlock the complete event gallery, including all available photos and videos.
+                </p>
+                <div className="mp-access-card__fields">
+                  <label className="mp-field">
+                    <span className="mp-field__label">Client code</span>
+                    <input
+                      className="mp-field__input"
+                      type="text"
+                      value={eventCode}
+                      onChange={(event) => handleCodeChange(event.target.value)}
+                      placeholder="For example MP-4K7RQP"
+                      autoComplete="off"
+                    />
+                  </label>
+                  <Button type="submit" disabled={status === 'checking'}>
+                    {status === 'checking' ? 'Checking' : 'Open Full Gallery'}
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </Button>
+                </div>
+                {status === 'invalid' || status === 'error' ? (
+                  <p className="mp-access-card__note mp-access-card__note--error" role="alert">
+                    {status === 'invalid' ? 'Invalid or expired client code.' : message}
+                  </p>
+                ) : null}
+              </form>
+
+              <div id="face-scan" className="mp-access-card mp-access-card--pink">
+                <span className="mp-access-card__icon"><ScanFace size={24} aria-hidden="true" /></span>
+                <h2 className="mp-access-card__title">Scan Your Photo</h2>
+                <p className="mp-access-card__text">
+                  No client code? Scan your face and Markipie will show only your matching photos from this event.
+                </p>
+                <div className="mp-access-card__fields">
+                  <Button variant="secondary" onClick={() => setScanOpen(true)}>
+                    <Camera size={16} aria-hidden="true" />
+                    Scan Your Photo
+                  </Button>
+                  <p className="mp-access-card__note mp-access-card__note--plain">
+                    Your face scan is limited to this event. It cannot unlock the full gallery.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <FaceScanFlow
+              open={scanOpen}
+              onClose={() => setScanOpen(false)}
+              eventId={qrEvent.event?.id}
+            />
+            <div className="mp-access-card__fields">
+              <Button variant="secondary" onClick={() => {
+                setQrEvent(null)
+                setScanOpen(false)
+              }}>
+                Back
+              </Button>
+            </div>
           </Container>
         </Section>
       </>
@@ -510,15 +644,14 @@ export default function ClientAccess() {
       <FaceScanFlow
         open={scanOpen}
         onClose={() => setScanOpen(false)}
-        visitor={visitor}
+        eventId={qrEvent?.event?.id}
       />
       <QrScannerDialog
         open={qrScanOpen}
         onClose={() => setQrScanOpen(false)}
         onDetected={(value) => {
           setQrScanOpen(false)
-          setEventCode(value)
-          lookup(value, 'qr')
+          void prepareQrEvent(value)
         }}
       />
       {gate ? (
