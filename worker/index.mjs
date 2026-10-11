@@ -1,5 +1,6 @@
 import * as tf from '@tensorflow/tfjs'
-import * as faceapi from '@vladmandic/face-api/dist/face-api.node.js'
+import * as wasm from '@tensorflow/tfjs-backend-wasm'
+import * as faceapi from '@vladmandic/face-api/dist/face-api.node-wasm.js'
 import { createClient } from '@supabase/supabase-js'
 import { Canvas, Image, ImageData, loadImage } from 'canvas'
 import path from 'node:path'
@@ -24,8 +25,11 @@ const db = createClient(supabaseUrl, serviceKey, {
 })
 
 async function loadModels() {
-  await faceapi.tf.setBackend('cpu')
+  wasm.setWasmPaths('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-wasm/dist/')
+  await tf.setBackend('wasm')
+  await faceapi.tf.setBackend('wasm')
   await faceapi.tf.enableProdMode()
+  await tf.ready()
   await faceapi.tf.ready()
   await faceapi.nets.tinyFaceDetector.loadFromDisk(modelPath)
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelPath)
@@ -143,7 +147,7 @@ async function processEvent(event) {
 }
 
 await loadModels()
-console.log(`TensorFlow.js CPU backend ready: ${faceapi.tf.getBackend()}; production mode enabled; concurrency=${concurrency}`)
+console.log(`TensorFlow.js WASM backend ready: ${faceapi.tf.getBackend()}; production mode enabled; concurrency=${concurrency}`)
 
 let query = db
   .from('events')
