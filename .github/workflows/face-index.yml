@@ -1,6 +1,11 @@
 name: MARKIPIE Face Index Worker
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/face-index.yml'
+      - 'worker/index.mjs'
   workflow_dispatch:
     inputs:
       event_id:
