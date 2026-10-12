@@ -882,11 +882,15 @@ async function serveMedia(request, mediaId) {
     if (metaResponse.ok) {
       const meta = await metaResponse.json()
       if (meta.thumbnailLink) {
-        const thumbResponse = await fetch(`${meta.thumbnailLink}&sz=w480`)
+        const thumbnailUrl = new URL(meta.thumbnailLink)
+        thumbnailUrl.searchParams.set('sz', 'w480')
+        const thumbResponse = await fetch(thumbnailUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         if (thumbResponse.ok) {
           return new Response(thumbResponse.body, {
             status: 200,
-            headers: { ...headers, 'Content-Type': 'image/jpeg' },
+            headers: { ...headers, 'Content-Type': thumbResponse.headers.get('content-type') ?? 'image/jpeg' },
           })
         }
       }
