@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Play } from 'lucide-react'
 import { Watermark } from '@/components/gallery/Watermark'
 import { mediaSrc } from '@/lib/drive'
@@ -8,6 +9,9 @@ import { mediaSrc } from '@/lib/drive'
  * viewer needs it.
  */
 export function MediaGrid({ media, code, watermark, onOpen }) {
+  const [fullFallback, setFullFallback] = useState({})
+  const [failed, setFailed] = useState({})
+
   return (
     <div className="mp-cg-grid">
       {media.map((item, index) => (
@@ -21,11 +25,24 @@ export function MediaGrid({ media, code, watermark, onOpen }) {
           }
         >
           <img
-            src={mediaSrc(item.id, code, 'thumb')}
+            src={mediaSrc(item.id, code, fullFallback[item.id] ? 'full' : 'thumb')}
             alt={item.file_type === 'video' ? `Video ${item.file_name ?? ''}`.trim() : (item.file_name ?? 'Photo')}
             loading="lazy"
             decoding="async"
+            onError={() => {
+              if (!fullFallback[item.id]) {
+                setFullFallback((current) => ({ ...current, [item.id]: true }))
+              } else {
+                setFailed((current) => ({ ...current, [item.id]: true }))
+              }
+            }}
+            style={failed[item.id] ? { opacity: 0 } : undefined}
           />
+          {failed[item.id] ? (
+            <span className="mp-cg-tile__fallback" role="img" aria-label={`Could not load ${item.file_name ?? 'photo'}`}>
+              Photo unavailable
+            </span>
+          ) : null}
           {watermark ? <Watermark compact /> : null}
           {item.file_type === 'video' ? (
             <span className="mp-cg-tile__play" aria-hidden="true">
