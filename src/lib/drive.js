@@ -47,6 +47,7 @@ async function driveFetch(token, path, options = {}) {
     ...options,
     headers: {
       ...(options.headers ?? {}),
+      ...(import.meta.env.VITE_SUPABASE_ANON_KEY ? { apikey: import.meta.env.VITE_SUPABASE_ANON_KEY } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
     },
