@@ -5,9 +5,9 @@ import { descriptorToText } from '@/lib/faceEngine'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 /**
- * Code-free, face-only access. The database issues a short-lived media grant
- * containing only photos matched to the captured face. No event code or full
- * gallery session is created.
+ * Code-free, face-only access. With an event QR, search that event; without one,
+ * search all active face-enabled events. The database grants access only to matched
+ * photos and never opens a full gallery session.
  */
 export function FaceScanFlow({ open, onClose, eventId }) {
   const navigate = useNavigate()
@@ -24,12 +24,17 @@ export function FaceScanFlow({ open, onClose, eventId }) {
 
     setSearching(true)
     try {
-      if (!eventId) throw new Error('Please open the event QR first, then start Face Scan.')
-      const { data, error } = await supabase.rpc('search_event_faces', {
-        p_event_id: eventId,
-        p_embedding: descriptorToText(descriptor),
-        p_threshold: 0.52,
-      })
+      const searchFaces = (threshold) => eventId
+        ? supabase.rpc('search_event_faces', {
+            p_event_id: eventId,
+            p_embedding: descriptorToText(descriptor),
+            p_threshold: threshold,
+          })
+        : supabase.rpc('search_all_event_faces', {
+            p_embedding: descriptorToText(descriptor),
+            p_threshold: threshold,
+          })
+      const { data, error } = await searchFaces(0.52)
       if (error) throw error
 
       let rows = Array.isArray(data) ? data : []
@@ -37,11 +42,7 @@ export function FaceScanFlow({ open, onClose, eventId }) {
       // improves recall for camera-vs-photo differences without making the
       // primary result set overly loose.
       if (rows.length === 0) {
-        const retry = await supabase.rpc('search_event_faces', {
-          p_event_id: eventId,
-          p_embedding: descriptorToText(descriptor),
-          p_threshold: 0.58,
-        })
+        const retry = await searchFaces(0.58)
         if (retry.error) throw retry.error
         rows = Array.isArray(retry.data) ? retry.data : []
       }
