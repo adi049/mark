@@ -118,21 +118,25 @@ export function getDriveJob(token, jobId) {
  */
 export function mediaSrc(mediaId, code, variant = 'full') {
   const base = driveBase()
+  const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  const apiKeyParam = apiKey ? `&apikey=${encodeURIComponent(apiKey)}` : ''
   if (String(code ?? '').startsWith('face:')) {
     const token = String(code).slice(5)
-    return `${base}/media/${mediaId}?ft=${encodeURIComponent(token)}&v=${variant}`
+    return `${base}/media/${mediaId}?ft=${encodeURIComponent(token)}&v=${variant}${apiKeyParam}`
   }
-  return `${base}/media/${mediaId}?t=${encodeURIComponent(code)}&v=${variant}`
+  return `${base}/media/${mediaId}?t=${encodeURIComponent(code)}&v=${variant}${apiKeyParam}`
 }
 
 /** Same stream, but with a download disposition. */
 export function mediaDownloadSrc(mediaId, code) {
   const base = driveBase()
+  const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  const apiKeyParam = apiKey ? `&apikey=${encodeURIComponent(apiKey)}` : ''
   if (String(code ?? '').startsWith('face:')) {
     const token = String(code).slice(5)
-    return `${base}/media/${mediaId}?ft=${encodeURIComponent(token)}&v=full&download=1`
+    return `${base}/media/${mediaId}?ft=${encodeURIComponent(token)}&v=full&download=1${apiKeyParam}`
   }
-  return `${base}/media/${mediaId}?t=${encodeURIComponent(code)}&v=full&download=1`
+  return `${base}/media/${mediaId}?t=${encodeURIComponent(code)}&v=full&download=1${apiKeyParam}`
 }
 
 /** Import phases in display order, matching the edge function. */
