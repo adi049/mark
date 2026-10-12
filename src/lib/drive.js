@@ -118,7 +118,7 @@ export function getDriveJob(token, jobId) {
  */
 export function mediaSrc(mediaId, code, variant = 'full') {
   const base = driveBase()
-  const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+  const apiKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_8rBzvz2lrQN6RQAL4vxpTg_MPnHagZu'
   const apiKeyParam = apiKey ? `&apikey=${encodeURIComponent(apiKey)}` : ''
   if (String(code ?? '').startsWith('face:')) {
     const token = String(code).slice(5)
