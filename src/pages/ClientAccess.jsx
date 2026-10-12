@@ -486,6 +486,23 @@ export default function ClientAccess() {
             </p>
           </div>
 
+          <div className="mp-access-card mp-access-card--pink" style={{ marginBottom: '1.25rem' }}>
+            <span className="mp-access-card__icon">
+              <ScanFace size={24} aria-hidden="true" />
+            </span>
+            <h2 className="mp-access-card__title">Find Your Photos with Face Scan</h2>
+            <p className="mp-access-card__text">
+              No event QR or client code? Scan your face to search matching photos across active Markipie events.
+              Only photos that match your face are shown; this does not unlock anyone's full gallery.
+            </p>
+            <div className="mp-access-card__fields">
+              <Button variant="secondary" onClick={() => setScanOpen(true)}>
+                <Camera size={16} aria-hidden="true" />
+                Start Face Scan
+              </Button>
+            </div>
+          </div>
+
           {!visitor ? (
             <form className="mp-access-card mp-access-card--blue" onSubmit={handleVisitorSubmit}>
               <span className="mp-access-card__icon">
