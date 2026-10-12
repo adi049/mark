@@ -25,7 +25,7 @@ export function MediaGrid({ media, code, watermark, onOpen }) {
           }
         >
           <img
-            src={mediaSrc(item.id, code, fullFallback[item.id] ? 'full' : 'full')}
+            src={mediaSrc(item.id, code, fullFallback[item.id] ? 'full' : 'thumb')}
             alt={item.file_type === 'video' ? `Video ${item.file_name ?? ''}`.trim() : (item.file_name ?? 'Photo')}
             loading="lazy"
             decoding="async"
