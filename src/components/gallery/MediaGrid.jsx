@@ -11,6 +11,7 @@ import { mediaSrc } from '@/lib/drive'
 export function MediaGrid({ media, code, watermark, onOpen }) {
   const [fullFallback, setFullFallback] = useState({})
   const [failed, setFailed] = useState({})
+  const [retryNonce, setRetryNonce] = useState({})
 
   return (
     <div className="mp-cg-grid">
@@ -25,13 +26,15 @@ export function MediaGrid({ media, code, watermark, onOpen }) {
           }
         >
           <img
-            src={mediaSrc(item.id, code, fullFallback[item.id] ? 'full' : 'thumb')}
+            src={`${mediaSrc(item.id, code, fullFallback[item.id] ? 'full' : 'thumb')}${mediaSrc(item.id, code, fullFallback[item.id] ? 'full' : 'thumb').includes('?') ? '&' : '?'}retry=${retryNonce[item.id] ?? 0}`}
             alt={item.file_type === 'video' ? `Video ${item.file_name ?? ''}`.trim() : (item.file_name ?? 'Photo')}
             loading="lazy"
             decoding="async"
             onError={() => {
               if (!fullFallback[item.id]) {
                 setFullFallback((current) => ({ ...current, [item.id]: true }))
+              } else if ((retryNonce[item.id] ?? 0) < 2) {
+                setRetryNonce((current) => ({ ...current, [item.id]: (current[item.id] ?? 0) + 1 }))
               } else {
                 setFailed((current) => ({ ...current, [item.id]: true }))
               }
